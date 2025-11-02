@@ -59,8 +59,4 @@ public abstract class Usuario implements UserDetails {
     return true;
   }
 
-  public enum Role {
-    PROFESSOR,
-    ALUNO
-  }
 }

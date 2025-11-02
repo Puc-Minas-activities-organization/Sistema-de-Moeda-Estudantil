@@ -2,9 +2,12 @@ package com.puc.moeda.repositories;
 
 import com.puc.moeda.models.EmpresaParceira;
 import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Optional;
 
 public interface EmpresaParceiraRepository extends JpaRepository<EmpresaParceira, Long> {
-  EmpresaParceira findByCnpj(String cnpj);
+  Optional<EmpresaParceira> findByEmail(String email);
+  
+  Optional<EmpresaParceira> findByCnpj(String cnpj);
 
   default EmpresaParceira saveEmpresa(EmpresaParceira empresa) {
     return save(empresa);

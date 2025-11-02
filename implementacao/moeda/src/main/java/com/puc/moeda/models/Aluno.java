@@ -7,15 +7,12 @@ import lombok.EqualsAndHashCode;
 @Entity
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class Aluno extends Usuario {
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+public class Aluno extends UsuarioCadastravel {
 
   @Column(unique = true)
   private String cpf;
 
+  private String nome;
   private String rg;
   private String instituicao;
   private double saldoMoedas;

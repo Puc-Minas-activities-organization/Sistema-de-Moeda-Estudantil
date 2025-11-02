@@ -2,11 +2,12 @@ package com.puc.moeda.repositories;
 
 import com.puc.moeda.models.Professor;
 import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Optional;
 
 public interface ProfessorRepository extends JpaRepository<Professor, Long> {
-  Professor findByEmail(String email);
+  Optional<Professor> findByEmail(String email);
 
-  Professor findByCpf(String cpf);
+  Optional<Professor> findByCpf(String cpf);
 
   default Professor saveProfessor(Professor professor) {
     return save(professor);

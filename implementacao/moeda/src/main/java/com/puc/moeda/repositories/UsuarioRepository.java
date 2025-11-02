@@ -2,9 +2,10 @@ package com.puc.moeda.repositories;
 
 import com.puc.moeda.models.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Optional;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
-  Usuario findByEmail(String email);
+  Optional<Usuario> findByEmail(String email);
 
   default Usuario saveUsuario(Usuario usuario) {
     return save(usuario);

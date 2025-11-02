@@ -9,14 +9,12 @@ import lombok.EqualsAndHashCode;
 @Entity
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class EmpresaParceira extends Usuario {
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+public class EmpresaParceira extends UsuarioCadastravel {
 
   @Column(unique = true)
   private String cnpj;
+
+  private String nome;
 
   @OneToMany(mappedBy = "empresaParceira", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Beneficio> beneficios;
