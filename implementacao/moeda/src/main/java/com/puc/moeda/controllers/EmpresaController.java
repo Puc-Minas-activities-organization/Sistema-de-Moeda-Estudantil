@@ -4,6 +4,7 @@ import com.puc.moeda.dto.BeneficioRequest;
 import com.puc.moeda.models.Beneficio;
 import com.puc.moeda.models.EmpresaParceira;
 import com.puc.moeda.models.ResgateBeneficio;
+import com.puc.moeda.repositories.EmpresaParceiraRepository;
 import com.puc.moeda.services.BeneficioService;
 import com.puc.moeda.services.ResgateService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,18 +17,25 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/empresa")
-@PreAuthorize("hasRole('EMPRESA_PARCEIRA')")  // Protege TODA a classe
-public class EmpresaController {    @Autowired
+public class EmpresaController {
+    
+    @Autowired
     private BeneficioService beneficioService;
     
     @Autowired
     private ResgateService resgateService;
+    
+    @Autowired
+    private EmpresaParceiraRepository empresaRepository;
+    
+    // ========== ENDPOINTS DA EMPRESA (requer autenticação EMPRESA_PARCEIRA) ==========
     
     /**
      * Cadastrar benefício
      * POST /api/empresa/beneficios
      */
     @PostMapping("/beneficios")
+    @PreAuthorize("hasRole('EMPRESA_PARCEIRA')")
     public ResponseEntity<?> cadastrarBeneficio(
             @AuthenticationPrincipal EmpresaParceira empresa,
             @RequestBody BeneficioRequest request) {
@@ -48,6 +56,7 @@ public class EmpresaController {    @Autowired
      * Editar benefício
      * PUT /api/empresa/beneficios/{id}
      */
+    @PreAuthorize("hasRole('EMPRESA_PARCEIRA')")
     @PutMapping("/beneficios/{id}")
     public ResponseEntity<?> editarBeneficio(
             @AuthenticationPrincipal EmpresaParceira empresa,
@@ -70,6 +79,7 @@ public class EmpresaController {    @Autowired
      * Remover benefício
      * DELETE /api/empresa/beneficios/{id}
      */
+    @PreAuthorize("hasRole('EMPRESA_PARCEIRA')")
     @DeleteMapping("/beneficios/{id}")
     public ResponseEntity<?> removerBeneficio(
             @AuthenticationPrincipal EmpresaParceira empresa,
@@ -91,6 +101,7 @@ public class EmpresaController {    @Autowired
      * Listar meus benefícios
      * GET /api/empresa/beneficios
      */
+    @PreAuthorize("hasRole('EMPRESA_PARCEIRA')")
     @GetMapping("/beneficios")
     public ResponseEntity<?> listarMeusBeneficios(@AuthenticationPrincipal EmpresaParceira empresa) {
         try {
@@ -105,6 +116,7 @@ public class EmpresaController {    @Autowired
      * Consultar benefício específico
      * GET /api/empresa/beneficios/{id}
      */
+    @PreAuthorize("hasRole('EMPRESA_PARCEIRA')")
     @GetMapping("/beneficios/{id}")
     public ResponseEntity<?> consultarBeneficio(@PathVariable Long id) {
         try {
@@ -119,6 +131,7 @@ public class EmpresaController {    @Autowired
      * Listar resgates dos meus benefícios
      * GET /api/empresa/resgates
      */
+    @PreAuthorize("hasRole('EMPRESA_PARCEIRA')")
     @GetMapping("/resgates")
     public ResponseEntity<?> listarResgates(@AuthenticationPrincipal EmpresaParceira empresa) {
         try {
@@ -133,6 +146,7 @@ public class EmpresaController {    @Autowired
      * Confirmar uso de resgate (validar código)
      * POST /api/empresa/resgates/confirmar/{codigo}
      */
+    @PreAuthorize("hasRole('EMPRESA_PARCEIRA')")
     @PostMapping("/resgates/confirmar/{codigo}")
     public ResponseEntity<?> confirmarResgate(
             @AuthenticationPrincipal EmpresaParceira empresa,
@@ -155,11 +169,90 @@ public class EmpresaController {    @Autowired
      * GET /api/empresa/perfil
      */
     @GetMapping("/perfil")
+    @PreAuthorize("hasRole('EMPRESA_PARCEIRA')")
     public ResponseEntity<?> consultarPerfil(@AuthenticationPrincipal EmpresaParceira empresa) {
         return ResponseEntity.ok(empresa);
     }
     
-    // Records para responses
+    /**
+     * Atualizar perfil da empresa
+     * PUT /api/empresa/perfil
+     */
+    @PutMapping("/perfil")
+    @PreAuthorize("hasRole('EMPRESA_PARCEIRA')")
+    public ResponseEntity<?> atualizarPerfil(
+            @AuthenticationPrincipal EmpresaParceira empresa,
+            @RequestBody AtualizarEmpresaRequest request) {
+        try {
+            // Atualizar apenas campos permitidos
+            if (request.nome() != null) {
+                empresa.setNome(request.nome());
+            }
+            
+            EmpresaParceira empresaSalva = empresaRepository.save(empresa);
+            return ResponseEntity.ok(new Response("Perfil atualizado com sucesso!", empresaSalva));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse("Erro ao atualizar perfil: " + e.getMessage()));
+        }
+    }
+    
+    // ========== CRUD PÚBLICO (sem autenticação) ==========
+    
+    /**
+     * Listar todas as empresas
+     * GET /api/empresa/todas
+     */
+    @GetMapping("/todas")
+    public ResponseEntity<List<EmpresaParceira>> listarTodasEmpresas() {
+        return ResponseEntity.ok(empresaRepository.findAll());
+    }
+
+    /**
+     * Buscar empresa por ID
+     * GET /api/empresa/{id}
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<?> buscarEmpresaPorId(@PathVariable Long id) {
+        return empresaRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
+     * Atualizar empresa por ID (público - qualquer um pode atualizar)
+     * PUT /api/empresa/{id}
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<?> atualizarEmpresa(
+            @PathVariable Long id,
+            @RequestBody AtualizarEmpresaAdminRequest request) {
+        return empresaRepository.findById(id)
+                .map(empresa -> {
+                    if (request.nome() != null) empresa.setNome(request.nome());
+                    if (request.cnpj() != null) empresa.setCnpj(request.cnpj());
+                    
+                    EmpresaParceira empresaSalva = empresaRepository.save(empresa);
+                    return ResponseEntity.ok(new Response("Empresa atualizada com sucesso!", empresaSalva));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
+     * Deletar empresa
+     * DELETE /api/empresa/{id}
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deletarEmpresa(@PathVariable Long id) {
+        if (!empresaRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        empresaRepository.deleteById(id);
+        return ResponseEntity.ok(new Response("Empresa deletada com sucesso!", null));
+    }
+    
+    // Records para requests e responses
+    record AtualizarEmpresaRequest(String nome) {}
+    record AtualizarEmpresaAdminRequest(String nome, String cnpj) {}
     record Response(String message, Object data) {}
     record ErrorResponse(String message) {}
 }

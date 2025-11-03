@@ -30,7 +30,6 @@ public class HashController {
         System.out.println("Teste de validação: " + teste);
         System.out.println("=================================");
         System.out.println("\nSQL para atualizar no banco:");
-        System.out.println("UPDATE usuario SET senha = '" + hash + "' WHERE email = 'joao.silva@puc.br';");
         System.out.println("UPDATE usuario SET senha = '" + hash + "' WHERE role = 'PROFESSOR';");
         System.out.println("UPDATE usuario SET senha = '" + hash + "' WHERE role = 'ALUNO';");
         System.out.println("UPDATE usuario SET senha = '" + hash + "' WHERE role = 'EMPRESA_PARCEIRA';");

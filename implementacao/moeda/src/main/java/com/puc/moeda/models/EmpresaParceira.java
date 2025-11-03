@@ -1,5 +1,6 @@
 package com.puc.moeda.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.persistence.Column;
 import java.util.List;
@@ -17,5 +18,6 @@ public class EmpresaParceira extends UsuarioCadastravel {
   private String nome;
 
   @OneToMany(mappedBy = "empresaParceira", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonIgnore
   private List<Beneficio> beneficios;
 }
