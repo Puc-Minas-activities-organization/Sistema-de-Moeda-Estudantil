@@ -34,16 +34,31 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/usuarios/cadastrar/aluno").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/usuarios/cadastrar/empresa").permitAll()
                         
-                        // Swagger/OpenAPI
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        // Temporário: endpoint para gerar hash
+                        .requestMatchers("/api/hash/**").permitAll()
+                        
+                        // Swagger/OpenAPI - liberar todos os endpoints relacionados
+                        .requestMatchers("/v3/api-docs/**", "/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        
+                        // CRUD público de Aluno (sem autenticação)
+                        .requestMatchers(HttpMethod.GET, "/api/aluno/todos").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/aluno/{id}").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/aluno/{id}").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/aluno/{id}").permitAll()
+                        
+                        // CRUD público de Empresa (sem autenticação)
+                        .requestMatchers(HttpMethod.GET, "/api/empresa/todas").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/empresa/{id}").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/empresa/{id}").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/empresa/{id}").permitAll()
                         
                         // Endpoints de Professor - apenas PROFESSOR
                         .requestMatchers("/api/professor/**").hasRole("PROFESSOR")
                         
-                        // Endpoints de Aluno - apenas ALUNO
+                        // Endpoints de Aluno (protegidos) - apenas ALUNO
                         .requestMatchers("/api/aluno/**").hasRole("ALUNO")
                         
-                        // Endpoints de Empresa - apenas EMPRESA_PARCEIRA
+                        // Endpoints de Empresa (protegidos) - apenas EMPRESA_PARCEIRA
                         .requestMatchers("/api/empresa/**").hasRole("EMPRESA_PARCEIRA")
                         
                         // Qualquer outra requisição precisa estar autenticada

@@ -1,5 +1,6 @@
 package com.puc.moeda.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -18,10 +19,12 @@ public class TransacaoMoeda {
     
     @ManyToOne
     @JoinColumn(name = "professor_id", nullable = false)
+    @JsonIgnoreProperties({"senha", "authorities", "accountNonExpired", "accountNonLocked", "credentialsNonExpired", "enabled", "username"})
     private Professor remetente;
     
     @ManyToOne
     @JoinColumn(name = "aluno_id", nullable = false)
+    @JsonIgnoreProperties({"transacoes", "resgates", "senha", "authorities", "accountNonExpired", "accountNonLocked", "credentialsNonExpired", "enabled", "username"})
     private Aluno destinatario;
     
     @Column(nullable = false)

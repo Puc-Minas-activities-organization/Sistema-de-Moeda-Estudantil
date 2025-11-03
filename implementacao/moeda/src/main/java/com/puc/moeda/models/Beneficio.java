@@ -1,5 +1,6 @@
 package com.puc.moeda.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -25,6 +26,7 @@ public class Beneficio {
   
   @ManyToOne
   @JoinColumn(name = "empresa_parceira_id", nullable = false)
+  @JsonIgnoreProperties({"beneficios", "senha", "authorities", "accountNonExpired", "accountNonLocked", "credentialsNonExpired", "enabled", "username"})
   private EmpresaParceira empresaParceira;
   
   @Column(nullable = false)
