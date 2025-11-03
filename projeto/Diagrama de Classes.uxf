@@ -1,4 +1,4 @@
-<diagram program="umletino" version="15.1"><zoom_level>6</zoom_level><help_text>Sistema de Moeda Estudantil - Diagrama de Classes</help_text><element><id>UMLClass</id><coordinates><x>330</x><y>6</y><w>210</w><h>102</h></coordinates><panel_attributes>&lt;&lt;abstract&gt;&gt;
+<diagram program="umletino" version="15.1"><zoom_level>5</zoom_level><help_text>Sistema de Moeda Estudantil - Diagrama de Classe</help_text><element><id>UMLClass</id><coordinates><x>275</x><y>135</y><w>175</w><h>85</h></coordinates><panel_attributes>&lt;&lt;abstract&gt;&gt;
 Usuario
 --
 -id: Long
@@ -8,7 +8,7 @@ Usuario
 --
 +getAuthorities(): Collection
 +getPassword(): String
-+getUsername(): String</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>168</x><y>294</y><w>240</w><h>90</h></coordinates><panel_attributes>Professor
++getUsername(): String</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>140</x><y>375</y><w>200</w><h>75</h></coordinates><panel_attributes>Professor
 --
 -cpf: String
 -nome: String
@@ -17,7 +17,7 @@ Usuario
 -saldoMoedas: double
 --
 +enviarMoedas(): void
-+consultarExtrato(): List&lt;TransacaoMoeda&gt;</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>528</x><y>300</y><w>210</w><h>102</h></coordinates><panel_attributes>Aluno
++consultarExtrato(): List&lt;TransacaoMoeda&gt;</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>440</x><y>380</y><w>175</w><h>85</h></coordinates><panel_attributes>Aluno
 --
 -cpf: String
 -nome: String
@@ -28,14 +28,14 @@ Usuario
 -saldoMoedas: double
 --
 +resgatarBeneficio(): ResgateBeneficio
-+consultarExtrato(): List&lt;Object&gt;</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>798</x><y>318</y><w>210</w><h>72</h></coordinates><panel_attributes>EmpresaParceira
++consultarExtrato(): List&lt;Object&gt;</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>665</x><y>395</y><w>175</w><h>60</h></coordinates><panel_attributes>EmpresaParceira
 --
 -cnpj: String
 -nome: String
 -beneficios: List&lt;Beneficio&gt;
 --
 +cadastrarBeneficio(): Beneficio
-+consultarBeneficios(): List&lt;Beneficio&gt;</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>474</x><y>672</y><w>210</w><h>90</h></coordinates><panel_attributes>Beneficio
++consultarBeneficios(): List&lt;Beneficio&gt;</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>395</x><y>690</y><w>175</w><h>75</h></coordinates><panel_attributes>Beneficio
 --
 -id: Long
 -nome: String
@@ -44,7 +44,7 @@ Usuario
 -foto: String
 -ativo: Boolean
 -empresaParceira: EmpresaParceira
---</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>162</x><y>492</y><w>240</w><h>108</h></coordinates><panel_attributes>TransacaoMoeda
+--</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>135</x><y>540</y><w>200</w><h>90</h></coordinates><panel_attributes>TransacaoMoeda
 --
 -id: Long
 -remetente: Professor
@@ -54,7 +54,7 @@ Usuario
 -dataTransacao: LocalDateTime
 -status: StatusTransacao
 --
-#onCreate(): void</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>474</x><y>492</y><w>210</w><h>126</h></coordinates><panel_attributes>ResgateBeneficio
+#onCreate(): void</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>395</x><y>540</y><w>175</w><h>105</h></coordinates><panel_attributes>ResgateBeneficio
 --
 -id: Long
 -aluno: Aluno
@@ -67,7 +67,7 @@ Usuario
 --
 #onCreate(): void
 +marcarComoUsado(): void
--gerarCodigoResgate(): String</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>96</x><y>0</y><w>180</w><h>96</h></coordinates><panel_attributes>&lt;&lt;enumeration&gt;&gt;
+-gerarCodigoResgate(): String</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>80</x><y>130</y><w>150</w><h>80</h></coordinates><panel_attributes>&lt;&lt;enumeration&gt;&gt;
 Role
 --
 PROFESSOR
@@ -77,37 +77,48 @@ EMPRESA_PARCEIRA
 +podeSeAutoCadastrar(): boolean
 +podeEnviarMoedas(): boolean
 +podeResgatarBeneficios(): boolean
-+podeGerenciarBeneficios(): boolean</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>0</x><y>516</y><w>120</w><h>54</h></coordinates><panel_attributes>&lt;&lt;enumeration&gt;&gt;
++podeGerenciarBeneficios(): boolean</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>0</x><y>560</y><w>100</w><h>45</h></coordinates><panel_attributes>&lt;&lt;enumeration&gt;&gt;
 StatusTransacao
 --
 PENDENTE
 CONCLUIDA
-CANCELADA</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>738</x><y>546</y><w>120</w><h>54</h></coordinates><panel_attributes>&lt;&lt;enumeration&gt;&gt;
+CANCELADA</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>615</x><y>585</y><w>100</w><h>45</h></coordinates><panel_attributes>&lt;&lt;enumeration&gt;&gt;
 StatusResgate
 --
 PENDENTE
 USADO
-CANCELADO</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>336</x><y>180</y><w>240</w><h>54</h></coordinates><panel_attributes>&lt;&lt;interface&gt;&gt;
+CANCELADO</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>280</x><y>280</y><w>200</w><h>45</h></coordinates><panel_attributes>&lt;&lt;interface&gt;&gt;
 UsuarioBasico&lt;T, TRequest, TResponse, TPerfilResponse&gt;
 --
 +alterarDados(email: String, request: TRequest): TResponse
 +consultarPerfil(email: String): TPerfilResponse
-+validarCredenciais(email: String, senha: String): boolean</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>270</x><y>30</y><w>72</w><h>18</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;10;100;10</additional_attributes></element><element><id>Relation</id><coordinates><x>294</x><y>96</y><w>48</w><h>210</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>60;10;10;330</additional_attributes></element><element><id>Relation</id><coordinates><x>360</x><y>228</y><w>42</w><h>78</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>10;10;50;110</additional_attributes></element><element><id>UMLClass</id><coordinates><x>810</x><y>78</y><w>240</w><h>48</h></coordinates><panel_attributes>&lt;&lt;interface&gt;&gt;
++validarCredenciais(email: String, senha: String): boolean</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>225</x><y>155</y><w>60</w><h>15</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;10;100;10</additional_attributes></element><element><id>Relation</id><coordinates><x>245</x><y>210</y><w>40</w><h>175</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>60;10;10;330</additional_attributes></element><element><id>Relation</id><coordinates><x>300</x><y>320</y><w>35</w><h>65</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>10;10;50;110</additional_attributes></element><element><id>UMLClass</id><coordinates><x>675</x><y>220</y><w>200</w><h>40</h></coordinates><panel_attributes>&lt;&lt;interface&gt;&gt;
 AutoCadastravel&lt;T, TRequest, TResponse&gt;
 --
 +cadastrar(request: TRequest): TResponse
-+validarDadosCadastro(request: TRequest): boolean</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>510</x><y>228</y><w>120</w><h>84</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>10;10;180;120</additional_attributes></element><element><id>Relation</id><coordinates><x>570</x><y>228</y><w>258</w><h>102</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>10;10;410;150</additional_attributes></element><element><id>Relation</id><coordinates><x>696</x><y>120</y><w>132</w><h>192</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>200;10;10;300</additional_attributes></element><element><id>Relation</id><coordinates><x>918</x><y>120</y><w>18</w><h>210</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>10;10;10;330</additional_attributes></element><element><id>UMLClass</id><coordinates><x>708</x><y>450</y><w>210</w><h>48</h></coordinates><panel_attributes>&lt;&lt;abstract&gt;&gt;
++validarDadosCadastro(request: TRequest): boolean</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>425</x><y>320</y><w>100</w><h>70</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>10;10;180;120</additional_attributes></element><element><id>Relation</id><coordinates><x>475</x><y>320</y><w>215</w><h>85</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>10;10;410;150</additional_attributes></element><element><id>Relation</id><coordinates><x>580</x><y>255</y><w>110</w><h>135</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>200;10;10;250</additional_attributes></element><element><id>Relation</id><coordinates><x>765</x><y>255</y><w>15</w><h>150</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>10;10;10;280</additional_attributes></element><element><id>UMLClass</id><coordinates><x>590</x><y>505</y><w>175</w><h>40</h></coordinates><panel_attributes>&lt;&lt;abstract&gt;&gt;
 UsuarioCadastravel
 --
 --
-+podeSeAutoCadastrar():boolean</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>732</x><y>396</y><w>18</w><h>66</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;90;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>798</x><y>384</y><w>18</w><h>78</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;110;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>678</x><y>540</y><w>72</w><h>18</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>100;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>618</x><y>396</y><w>30</w><h>108</h></coordinates><panel_attributes>lt=&lt;-
++podeSeAutoCadastrar():boolean</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>610</x><y>460</y><w>15</w><h>55</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;90;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>665</x><y>450</y><w>15</w><h>65</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;110;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>565</x><y>580</y><w>60</w><h>15</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>100;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>515</x><y>460</y><w>25</w><h>90</h></coordinates><panel_attributes>lt=&lt;-
 m1=0..n
-m2=1</panel_attributes><additional_attributes>10;160;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>600</x><y>612</y><w>30</w><h>72</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m2=1</panel_attributes><additional_attributes>10;160;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>500</x><y>640</y><w>25</w><h>60</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=0..n
-m2=1</panel_attributes><additional_attributes>10;10;10;100</additional_attributes></element><element><id>Relation</id><coordinates><x>114</x><y>540</y><w>60</w><h>18</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;10;80;10</additional_attributes></element><element><id>Relation</id><coordinates><x>396</x><y>390</y><w>144</w><h>114</h></coordinates><panel_attributes>lt=&lt;-
+m2=1</panel_attributes><additional_attributes>10;10;10;100</additional_attributes></element><element><id>Relation</id><coordinates><x>95</x><y>580</y><w>50</w><h>15</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;10;80;10</additional_attributes></element><element><id>Relation</id><coordinates><x>330</x><y>455</y><w>120</w><h>95</h></coordinates><panel_attributes>lt=&lt;-
 recebe
 m1=0..n
-m2=1</panel_attributes><additional_attributes>10;170;220;10</additional_attributes></element><element><id>Relation</id><coordinates><x>288</x><y>378</y><w>36</w><h>126</h></coordinates><panel_attributes>lt=&lt;-
+m2=1</panel_attributes><additional_attributes>10;170;220;10</additional_attributes></element><element><id>Relation</id><coordinates><x>240</x><y>445</y><w>30</w><h>105</h></coordinates><panel_attributes>lt=&lt;-
 envia
 m1=0..n
-m2=1</panel_attributes><additional_attributes>10;190;10;10</additional_attributes></element></diagram>
+m2=1</panel_attributes><additional_attributes>10;190;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>525</x><y>130</y><w>200</w><h>75</h></coordinates><panel_attributes>Notificacao
+--
+-id: Long
+-destinatario: Usuario
+-tipo: String
+-mensagem: String
+-dataEnvio: LocalDateTime
+-lida: Boolean
+--
++marcarComoLida(): void</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>445</x><y>165</y><w>90</w><h>20</h></coordinates><panel_attributes>lt=&lt;-
+m1=1
+m2=1</panel_attributes><additional_attributes>160;10;10;10</additional_attributes></element></diagram>
