@@ -34,17 +34,23 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/usuarios/cadastrar/aluno").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/usuarios/cadastrar/empresa").permitAll()
                         
-                        // Swagger/OpenAPI
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        // Temporário: endpoint para gerar hash
+                        .requestMatchers("/api/hash/**").permitAll()
+                        
+                        // Swagger/OpenAPI - liberar todos os endpoints relacionados
+                        .requestMatchers("/v3/api-docs/**", "/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        
+                        // Endpoints de Admin - apenas ADMIN
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         
                         // Endpoints de Professor - apenas PROFESSOR
                         .requestMatchers("/api/professor/**").hasRole("PROFESSOR")
                         
-                        // Endpoints de Aluno - apenas ALUNO
-                        .requestMatchers("/api/aluno/**").hasRole("ALUNO")
+                        // Endpoints de Aluno - ADMIN ou ALUNO (controle de acesso no controller)
+                        .requestMatchers("/api/aluno/**").hasAnyRole("ADMIN", "ALUNO")
                         
-                        // Endpoints de Empresa - apenas EMPRESA_PARCEIRA
-                        .requestMatchers("/api/empresa/**").hasRole("EMPRESA_PARCEIRA")
+                        // Endpoints de Empresa - ADMIN ou EMPRESA_PARCEIRA
+                        .requestMatchers("/api/empresa/**").hasAnyRole("ADMIN", "EMPRESA_PARCEIRA")
                         
                         // Qualquer outra requisição precisa estar autenticada
                         .anyRequest().authenticated()
