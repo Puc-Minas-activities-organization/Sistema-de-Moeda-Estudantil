@@ -6,56 +6,50 @@ import com.puc.moeda.models.EmpresaParceira;
 import com.puc.moeda.models.ResgateBeneficio;
 import com.puc.moeda.repositories.EmpresaParceiraRepository;
 import com.puc.moeda.services.BeneficioService;
+import com.puc.moeda.services.EmpresaParceiraService;
 import com.puc.moeda.services.ResgateService;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/empresa")
 public class EmpresaController {
-    
+    @Autowired
+    private EmpresaParceiraService empresaParceiraService;
+
     @Autowired
     private BeneficioService beneficioService;
-    
+
     @Autowired
     private ResgateService resgateService;
-    
+
     @Autowired
     private EmpresaParceiraRepository empresaRepository;
-    
-    // ========== ENDPOINTS DA EMPRESA (requer autenticação EMPRESA_PARCEIRA) ==========
-    
-    /**
-     * Cadastrar benefício
-     * POST /api/empresa/beneficios
-     */
+
+    // ========== ENDPOINTS DA EMPRESA (requer autenticação EMPRESA_PARCEIRA)
+    // ==========
+
+    /** Cadastrar benefício POST /api/empresa/beneficios */
     @PostMapping("/beneficios")
     @PreAuthorize("hasRole('EMPRESA_PARCEIRA')")
     public ResponseEntity<?> cadastrarBeneficio(
-            @AuthenticationPrincipal EmpresaParceira empresa,
-            @RequestBody BeneficioRequest request) {
+            @AuthenticationPrincipal EmpresaParceira empresa, @RequestBody BeneficioRequest request) {
         try {
             Beneficio beneficio = beneficioService.cadastrarBeneficio(empresa, request);
-            return ResponseEntity.ok(new Response(
-                "Benefício cadastrado com sucesso!",
-                beneficio
-            ));
+            return ResponseEntity.ok(new Response("Benefício cadastrado com sucesso!", beneficio));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse("Erro ao cadastrar benefício: " + e.getMessage()));
+            return ResponseEntity.badRequest()
+                    .body(new ErrorResponse("Erro ao cadastrar benefício: " + e.getMessage()));
         }
     }
-    
-    /**
-     * Editar benefício
-     * PUT /api/empresa/beneficios/{id}
-     */
+
+    /** Editar benefício PUT /api/empresa/beneficios/{id} */
     @PreAuthorize("hasRole('EMPRESA_PARCEIRA')")
     @PutMapping("/beneficios/{id}")
     public ResponseEntity<?> editarBeneficio(
@@ -64,43 +58,32 @@ public class EmpresaController {
             @RequestBody BeneficioRequest request) {
         try {
             Beneficio beneficio = beneficioService.editarBeneficio(id, empresa, request);
-            return ResponseEntity.ok(new Response(
-                "Benefício atualizado com sucesso!",
-                beneficio
-            ));
+            return ResponseEntity.ok(new Response("Benefício atualizado com sucesso!", beneficio));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse("Erro ao editar benefício: " + e.getMessage()));
+            return ResponseEntity.badRequest()
+                    .body(new ErrorResponse("Erro ao editar benefício: " + e.getMessage()));
         }
     }
-    
-    /**
-     * Remover benefício
-     * DELETE /api/empresa/beneficios/{id}
-     */
+
+    /** Remover benefício DELETE /api/empresa/beneficios/{id} */
     @PreAuthorize("hasRole('EMPRESA_PARCEIRA')")
     @DeleteMapping("/beneficios/{id}")
     public ResponseEntity<?> removerBeneficio(
-            @AuthenticationPrincipal EmpresaParceira empresa,
-            @PathVariable Long id) {
+            @AuthenticationPrincipal EmpresaParceira empresa, @PathVariable Long id) {
         try {
             beneficioService.removerBeneficio(id, empresa);
-            return ResponseEntity.ok(new Response(
-                "Benefício removido com sucesso!",
-                null
-            ));
+            return ResponseEntity.ok(new Response("Benefício removido com sucesso!", null));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse("Erro ao remover benefício: " + e.getMessage()));
+            return ResponseEntity.badRequest()
+                    .body(new ErrorResponse("Erro ao remover benefício: " + e.getMessage()));
         }
     }
-    
-    /**
-     * Listar meus benefícios
-     * GET /api/empresa/beneficios
-     */
+
+    /** Listar meus benefícios GET /api/empresa/beneficios */
     @PreAuthorize("hasRole('EMPRESA_PARCEIRA')")
     @GetMapping("/beneficios")
     public ResponseEntity<?> listarMeusBeneficios(@AuthenticationPrincipal EmpresaParceira empresa) {
@@ -108,14 +91,12 @@ public class EmpresaController {
             List<Beneficio> beneficios = beneficioService.listarBeneficiosEmpresa(empresa);
             return ResponseEntity.ok(beneficios);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse("Erro ao listar benefícios: " + e.getMessage()));
+            return ResponseEntity.badRequest()
+                    .body(new ErrorResponse("Erro ao listar benefícios: " + e.getMessage()));
         }
     }
-    
-    /**
-     * Consultar benefício específico
-     * GET /api/empresa/beneficios/{id}
-     */
+
+    /** Consultar benefício específico GET /api/empresa/beneficios/{id} */
     @PreAuthorize("hasRole('EMPRESA_PARCEIRA')")
     @GetMapping("/beneficios/{id}")
     public ResponseEntity<?> consultarBeneficio(@PathVariable Long id) {
@@ -123,14 +104,12 @@ public class EmpresaController {
             Beneficio beneficio = beneficioService.consultarBeneficio(id);
             return ResponseEntity.ok(beneficio);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse("Erro ao consultar benefício: " + e.getMessage()));
+            return ResponseEntity.badRequest()
+                    .body(new ErrorResponse("Erro ao consultar benefício: " + e.getMessage()));
         }
     }
-    
-    /**
-     * Listar resgates dos meus benefícios
-     * GET /api/empresa/resgates
-     */
+
+    /** Listar resgates dos meus benefícios GET /api/empresa/resgates */
     @PreAuthorize("hasRole('EMPRESA_PARCEIRA')")
     @GetMapping("/resgates")
     public ResponseEntity<?> listarResgates(@AuthenticationPrincipal EmpresaParceira empresa) {
@@ -138,46 +117,38 @@ public class EmpresaController {
             List<ResgateBeneficio> resgates = resgateService.listarResgatesEmpresa(empresa.getId());
             return ResponseEntity.ok(resgates);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse("Erro ao listar resgates: " + e.getMessage()));
+            return ResponseEntity.badRequest()
+                    .body(new ErrorResponse("Erro ao listar resgates: " + e.getMessage()));
         }
     }
-    
+
     /**
-     * Confirmar uso de resgate (validar código)
-     * POST /api/empresa/resgates/confirmar/{codigo}
+     * Confirmar uso de resgate (validar código) POST
+     * /api/empresa/resgates/confirmar/{codigo}
      */
     @PreAuthorize("hasRole('EMPRESA_PARCEIRA')")
     @PostMapping("/resgates/confirmar/{codigo}")
     public ResponseEntity<?> confirmarResgate(
-            @AuthenticationPrincipal EmpresaParceira empresa,
-            @PathVariable String codigo) {
+            @AuthenticationPrincipal EmpresaParceira empresa, @PathVariable String codigo) {
         try {
             resgateService.confirmarUsoResgate(codigo, empresa);
-            return ResponseEntity.ok(new Response(
-                "Resgate confirmado com sucesso!",
-                null
-            ));
+            return ResponseEntity.ok(new Response("Resgate confirmado com sucesso!", null));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse("Erro ao confirmar resgate: " + e.getMessage()));
+            return ResponseEntity.badRequest()
+                    .body(new ErrorResponse("Erro ao confirmar resgate: " + e.getMessage()));
         }
     }
-    
-    /**
-     * Consultar perfil
-     * GET /api/empresa/perfil
-     */
+
+    /** Consultar perfil GET /api/empresa/perfil */
     @GetMapping("/perfil")
     @PreAuthorize("hasRole('EMPRESA_PARCEIRA')")
     public ResponseEntity<?> consultarPerfil(@AuthenticationPrincipal EmpresaParceira empresa) {
         return ResponseEntity.ok(empresa);
     }
-    
-    /**
-     * Atualizar perfil da empresa
-     * PUT /api/empresa/perfil
-     */
+
+    /** Atualizar perfil da empresa PUT /api/empresa/perfil */
     @PutMapping("/perfil")
     @PreAuthorize("hasRole('EMPRESA_PARCEIRA')")
     public ResponseEntity<?> atualizarPerfil(
@@ -188,59 +159,56 @@ public class EmpresaController {
             if (request.nome() != null) {
                 empresa.setNome(request.nome());
             }
-            
+
             EmpresaParceira empresaSalva = empresaRepository.save(empresa);
             return ResponseEntity.ok(new Response("Perfil atualizado com sucesso!", empresaSalva));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse("Erro ao atualizar perfil: " + e.getMessage()));
+            return ResponseEntity.badRequest()
+                    .body(new ErrorResponse("Erro ao atualizar perfil: " + e.getMessage()));
         }
     }
-    
+
     // ========== CRUD PÚBLICO (sem autenticação) ==========
-    
-    /**
-     * Listar todas as empresas
-     * GET /api/empresa/todas
-     */
+
+    /** Listar todas as empresas GET /api/empresa/todas */
     @GetMapping("/todas")
     public ResponseEntity<List<EmpresaParceira>> listarTodasEmpresas() {
         return ResponseEntity.ok(empresaRepository.findAll());
     }
 
-    /**
-     * Buscar empresa por ID
-     * GET /api/empresa/{id}
-     */
+    /** Buscar empresa por ID GET /api/empresa/{id} */
     @GetMapping("/{id}")
     public ResponseEntity<?> buscarEmpresaPorId(@PathVariable Long id) {
-        return empresaRepository.findById(id)
+        return empresaRepository
+                .findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     /**
-     * Atualizar empresa por ID (público - qualquer um pode atualizar)
-     * PUT /api/empresa/{id}
+     * Atualizar empresa por ID (público - qualquer um pode atualizar) PUT
+     * /api/empresa/{id}
      */
     @PutMapping("/{id}")
     public ResponseEntity<?> atualizarEmpresa(
-            @PathVariable Long id,
-            @RequestBody AtualizarEmpresaAdminRequest request) {
-        return empresaRepository.findById(id)
-                .map(empresa -> {
-                    if (request.nome() != null) empresa.setNome(request.nome());
-                    if (request.cnpj() != null) empresa.setCnpj(request.cnpj());
-                    
-                    EmpresaParceira empresaSalva = empresaRepository.save(empresa);
-                    return ResponseEntity.ok(new Response("Empresa atualizada com sucesso!", empresaSalva));
-                })
+            @PathVariable Long id, @RequestBody AtualizarEmpresaAdminRequest request) {
+        return empresaRepository
+                .findById(id)
+                .map(
+                        empresa -> {
+                            if (request.nome() != null)
+                                empresa.setNome(request.nome());
+                            if (request.cnpj() != null)
+                                empresa.setCnpj(request.cnpj());
+
+                            EmpresaParceira empresaSalva = empresaRepository.save(empresa);
+                            return ResponseEntity.ok(
+                                    new Response("Empresa atualizada com sucesso!", empresaSalva));
+                        })
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /**
-     * Deletar empresa
-     * DELETE /api/empresa/{id}
-     */
+    /** Deletar empresa DELETE /api/empresa/{id} */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletarEmpresa(@PathVariable Long id) {
         if (!empresaRepository.existsById(id)) {
@@ -249,10 +217,29 @@ public class EmpresaController {
         empresaRepository.deleteById(id);
         return ResponseEntity.ok(new Response("Empresa deletada com sucesso!", null));
     }
-    
+
+    @DeleteMapping("/deletar-conta")
+    @PreAuthorize("hasRole('EMPRESA_PARCEIRA')")
+    public ResponseEntity<?> deletarConta(@AuthenticationPrincipal EmpresaParceira empresa) {
+        try {
+            empresaParceiraService.deletarConta(empresa.getEmail());
+            return ResponseEntity.ok(new Response("Conta de empresa deletada com sucesso!", null));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(new ErrorResponse("Erro ao deletar conta: " + e.getMessage()));
+        }
+    }
+
     // Records para requests e responses
-    record AtualizarEmpresaRequest(String nome) {}
-    record AtualizarEmpresaAdminRequest(String nome, String cnpj) {}
-    record Response(String message, Object data) {}
-    record ErrorResponse(String message) {}
+    record AtualizarEmpresaRequest(String nome, String email, String senha, String endereco) {
+    }
+
+    record AtualizarEmpresaAdminRequest(String nome, String cnpj) {
+    }
+
+    record Response(String message, Object data) {
+    }
+
+    record ErrorResponse(String message) {
+    }
 }

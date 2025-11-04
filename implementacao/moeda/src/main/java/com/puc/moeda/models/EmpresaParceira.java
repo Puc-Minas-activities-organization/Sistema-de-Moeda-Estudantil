@@ -17,6 +17,8 @@ public class EmpresaParceira extends UsuarioCadastravel {
 
   private String nome;
 
+  private String endereco;
+
   @OneToMany(mappedBy = "empresaParceira", cascade = CascadeType.ALL, orphanRemoval = true)
   @JsonIgnore
   private List<Beneficio> beneficios;
