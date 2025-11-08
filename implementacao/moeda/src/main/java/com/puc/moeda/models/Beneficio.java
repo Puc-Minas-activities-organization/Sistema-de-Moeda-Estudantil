@@ -21,8 +21,8 @@ public class Beneficio {
   @Column(length = 1000)
   private String descricao;
   
-  @Column(length = 500)
-  private String foto; // URL ou caminho da foto
+  @Column(columnDefinition = "LONGTEXT")
+  private String foto; // Base64 ou URL da foto
   
   @ManyToOne
   @JoinColumn(name = "empresa_parceira_id", nullable = false)
@@ -30,6 +30,6 @@ public class Beneficio {
   private EmpresaParceira empresaParceira;
   
   @Column(nullable = false)
-  private Boolean ativo = true; // Se o benefício está disponível
+  private Boolean ativo = true;
 
 }

@@ -43,7 +43,6 @@ public class AlunoController {
     }
   }
 
-  // ========== ENDPOINTS DO ALUNO (requer autenticação ALUNO) ==========
 
   /** Listar benefícios disponíveis GET /api/aluno/beneficios */
   @GetMapping("/beneficios")

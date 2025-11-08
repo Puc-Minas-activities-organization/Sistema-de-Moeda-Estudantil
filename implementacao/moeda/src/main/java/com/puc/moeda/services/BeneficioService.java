@@ -4,6 +4,7 @@ import com.puc.moeda.dto.BeneficioRequest;
 import com.puc.moeda.models.Beneficio;
 import com.puc.moeda.models.EmpresaParceira;
 import com.puc.moeda.repositories.BeneficioRepository;
+import com.puc.moeda.utils.FotoValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,12 +34,18 @@ public class BeneficioService {
         if (request.getDescricao() == null || request.getDescricao().trim().isEmpty()) {
             throw new IllegalArgumentException("Descrição é obrigatória");
         }
+
+        if (request.getFoto() != null && !request.getFoto().trim().isEmpty()) {
+            if (!FotoValidator.isValid(request.getFoto())) {
+                throw new IllegalArgumentException("Foto deve ser uma URL válida ou Base64 válido (máx 5MB)");
+            }
+        }
         
         Beneficio beneficio = new Beneficio();
         beneficio.setNome(request.getNome());
         beneficio.setCusto(request.getCusto());
         beneficio.setDescricao(request.getDescricao());
-        beneficio.setFoto(request.getFoto());
+        beneficio.setFoto(FotoValidator.normalize(request.getFoto()));
         beneficio.setEmpresaParceira(empresa);
         beneficio.setAtivo(true);
         
@@ -66,8 +73,11 @@ public class BeneficioService {
         if (request.getDescricao() != null) {
             beneficio.setDescricao(request.getDescricao());
         }
-        if (request.getFoto() != null) {
-            beneficio.setFoto(request.getFoto());
+        if (request.getFoto() != null && !request.getFoto().trim().isEmpty()) {
+            if (!FotoValidator.isValid(request.getFoto())) {
+                throw new IllegalArgumentException("Foto deve ser uma URL válida ou Base64 válido (máx 5MB)");
+            }
+            beneficio.setFoto(FotoValidator.normalize(request.getFoto()));
         }
         
         return beneficioRepository.save(beneficio);
