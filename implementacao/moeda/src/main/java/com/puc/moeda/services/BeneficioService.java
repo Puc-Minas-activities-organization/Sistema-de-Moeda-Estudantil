@@ -21,7 +21,7 @@ public class BeneficioService {
      */
     @Transactional
     public Beneficio cadastrarBeneficio(EmpresaParceira empresa, BeneficioRequest request) {
-        // Validações
+        
         if (request.getNome() == null || request.getNome().trim().isEmpty()) {
             throw new IllegalArgumentException("Nome do benefício é obrigatório");
         }
@@ -53,12 +53,10 @@ public class BeneficioService {
         Beneficio beneficio = beneficioRepository.findById(beneficioId)
             .orElseThrow(() -> new RuntimeException("Benefício não encontrado"));
         
-        // Verificar se o benefício pertence à empresa
         if (!beneficio.getEmpresaParceira().getId().equals(empresa.getId())) {
             throw new IllegalArgumentException("Este benefício não pertence a sua empresa");
         }
         
-        // Atualizar campos
         if (request.getNome() != null) {
             beneficio.setNome(request.getNome());
         }
@@ -83,12 +81,10 @@ public class BeneficioService {
         Beneficio beneficio = beneficioRepository.findById(beneficioId)
             .orElseThrow(() -> new RuntimeException("Benefício não encontrado"));
         
-        // Verificar se o benefício pertence à empresa
         if (!beneficio.getEmpresaParceira().getId().equals(empresa.getId())) {
             throw new IllegalArgumentException("Este benefício não pertence a sua empresa");
         }
         
-        // Desativar ao invés de deletar (soft delete)
         beneficio.setAtivo(false);
         beneficioRepository.save(beneficio);
     }

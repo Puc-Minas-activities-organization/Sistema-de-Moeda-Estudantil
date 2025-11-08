@@ -23,6 +23,7 @@ public class UsuarioServiceFactory {
             case ALUNO -> alunoService;
             case EMPRESA_PARCEIRA -> empresaParceiraService;
             case PROFESSOR -> professorService;
+            case ADMIN -> throw new UnsupportedOperationException("ADMIN não possui serviço de usuário básico");
         };
     }
 
@@ -35,7 +36,7 @@ public class UsuarioServiceFactory {
         return switch (role) {
             case ALUNO -> alunoService;
             case EMPRESA_PARCEIRA -> empresaParceiraService;
-            default -> throw new UnsupportedOperationException(
+            case ADMIN, PROFESSOR -> throw new UnsupportedOperationException(
                 "Auto-cadastro não suportado para: " + role);
         };
     }
