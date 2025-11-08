@@ -2,6 +2,7 @@ package com.puc.moeda.controllers;
 
 import com.puc.moeda.dto.AlunoRequest;
 import com.puc.moeda.dto.ExtratoItemDTO;
+import com.puc.moeda.dto.NotificacaoDTO;
 import com.puc.moeda.dto.ResgateResponse;
 import com.puc.moeda.models.Aluno;
 import com.puc.moeda.models.Beneficio;
@@ -10,6 +11,7 @@ import com.puc.moeda.repositories.AlunoRepository;
 import com.puc.moeda.services.AlunoService;
 import com.puc.moeda.services.BeneficioService;
 import com.puc.moeda.services.ExtratoService;
+import com.puc.moeda.services.HistoricoNotificacaoService;
 import com.puc.moeda.services.ResgateService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,8 @@ public class AlunoController {
   @Autowired private ExtratoService extratoService;
 
   @Autowired private AlunoRepository alunoRepository;
+
+  @Autowired private HistoricoNotificacaoService historicoNotificacaoService;
 
   @DeleteMapping("/deletar-conta")
   @PreAuthorize("hasRole('ALUNO')")
@@ -96,6 +100,59 @@ public class AlunoController {
     } catch (Exception e) {
       return ResponseEntity.badRequest()
           .body(new ErrorResponse("Erro ao listar resgates: " + e.getMessage()));
+    }
+  }
+
+  /** Listar notificações/emails GET /api/aluno/notificacoes */
+  @GetMapping("/notificacoes")
+  @PreAuthorize("hasRole('ALUNO')")
+  public ResponseEntity<?> listarNotificacoes(@AuthenticationPrincipal Aluno aluno) {
+    try {
+      List<NotificacaoDTO> notificacoes = historicoNotificacaoService.listarNotificacoes(aluno);
+      Long naoLidas = historicoNotificacaoService.contarNaoLidas(aluno);
+      return ResponseEntity.ok(new NotificacoesResponse(notificacoes, naoLidas));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest()
+          .body(new ErrorResponse("Erro ao listar notificações: " + e.getMessage()));
+    }
+  }
+
+  /** Listar apenas notificações não lidas GET /api/aluno/notificacoes/nao-lidas */
+  @GetMapping("/notificacoes/nao-lidas")
+  @PreAuthorize("hasRole('ALUNO')")
+  public ResponseEntity<?> listarNotificacoesNaoLidas(@AuthenticationPrincipal Aluno aluno) {
+    try {
+      List<NotificacaoDTO> notificacoes = historicoNotificacaoService.listarNotificacoesNaoLidas(aluno);
+      return ResponseEntity.ok(notificacoes);
+    } catch (Exception e) {
+      return ResponseEntity.badRequest()
+          .body(new ErrorResponse("Erro ao listar notificações não lidas: " + e.getMessage()));
+    }
+  }
+
+  /** Marcar notificação como lida PUT /api/aluno/notificacoes/{id}/lida */
+  @PutMapping("/notificacoes/{id}/lida")
+  @PreAuthorize("hasRole('ALUNO')")
+  public ResponseEntity<?> marcarComoLida(@PathVariable Long id) {
+    try {
+      historicoNotificacaoService.marcarComoLida(id);
+      return ResponseEntity.ok(new Response("Notificação marcada como lida", null));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest()
+          .body(new ErrorResponse("Erro ao marcar notificação: " + e.getMessage()));
+    }
+  }
+
+  /** Marcar todas as notificações como lidas PUT /api/aluno/notificacoes/marcar-todas-lidas */
+  @PutMapping("/notificacoes/marcar-todas-lidas")
+  @PreAuthorize("hasRole('ALUNO')")
+  public ResponseEntity<?> marcarTodasComoLidas(@AuthenticationPrincipal Aluno aluno) {
+    try {
+      historicoNotificacaoService.marcarTodasComoLidas(aluno);
+      return ResponseEntity.ok(new Response("Todas as notificações marcadas como lidas", null));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest()
+          .body(new ErrorResponse("Erro ao marcar notificações: " + e.getMessage()));
     }
   }
 
@@ -187,6 +244,16 @@ public class AlunoController {
     return ResponseEntity.ok(new Response("Aluno deletado com sucesso!", null));
   }
 
+  record Response(String message, Object data) {}
+
+  record ErrorResponse(String message) {}
+
+  record ExtratoResponse(Double saldoAtual, List<ExtratoItemDTO> transacoes) {}
+
+  record SaldoResponse(Double saldo, String usuario) {}
+  
+  record NotificacoesResponse(List<NotificacaoDTO> notificacoes, Long naoLidas) {}
+  
   // Records para requests e responses
   record AtualizarAlunoRequest(
       String nome, String endereco, String curso, String email, String senha) {}
@@ -199,12 +266,4 @@ public class AlunoController {
       String curso,
       String instituicao,
       Double saldoMoedas) {}
-
-  record Response(String message, Object data) {}
-
-  record ErrorResponse(String message) {}
-
-  record ExtratoResponse(Double saldoAtual, List<ExtratoItemDTO> transacoes) {}
-
-  record SaldoResponse(Double saldo, String usuario) {}
 }

@@ -1,9 +1,12 @@
 package com.puc.moeda.services;
 
 import com.puc.moeda.models.Aluno;
+import com.puc.moeda.models.Notificacao;
 import com.puc.moeda.models.ResgateBeneficio;
 import com.puc.moeda.models.TransacaoMoeda;
+import com.puc.moeda.repositories.NotificacaoRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -13,6 +16,9 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 public class NotificacaoService {
+    
+    @Autowired(required = false)
+    private NotificacaoRepository notificacaoRepository;
     
     /**
      * Notifica aluno quando recebe moedas
@@ -41,6 +47,11 @@ public class NotificacaoService {
         );
         
         enviarEmail(emailDestinatario, assunto, corpo);
+        
+        // Armazenar notificação no banco
+        if (notificacaoRepository != null) {
+            salvarNotificacao(aluno, "RECEBIMENTO_MOEDAS", assunto, corpo, String.valueOf(transacao.getId()));
+        }
     }
     
     /**
@@ -72,6 +83,11 @@ public class NotificacaoService {
         );
         
         enviarEmail(emailDestinatario, assunto, corpo);
+        
+        // Armazenar notificação no banco
+        if (notificacaoRepository != null) {
+            salvarNotificacao(aluno, "RESGATE_BENEFICIO", assunto, corpo, resgate.getCodigoResgate());
+        }
     }
     
     /**
@@ -116,5 +132,26 @@ public class NotificacaoService {
         
         // TODO: Implementar envio real de email
         // Exemplo com JavaMail ou alguma API de terceiros
+    }
+    
+    /**
+     * Salva a notificação no banco de dados para histórico
+     */
+    private void salvarNotificacao(com.puc.moeda.models.Usuario usuario, String tipo, String assunto, String corpo, String codigoReferencia) {
+        if (notificacaoRepository != null) {
+            try {
+                Notificacao notificacao = new Notificacao();
+                notificacao.setUsuario(usuario);
+                notificacao.setTipo(tipo);
+                notificacao.setAssunto(assunto);
+                notificacao.setCorpo(corpo);
+                notificacao.setCodigoReferencia(codigoReferencia);
+                notificacao.setLida(false);
+                
+                notificacaoRepository.save(notificacao);
+            } catch (Exception e) {
+                log.warn("Erro ao salvar notificação no banco: {}", e.getMessage());
+            }
+        }
     }
 }
