@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cadastro - Moeda Estudantil</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-start justify-center py-12">
+  <div class="w-full max-w-4xl p-8 bg-white rounded shadow">
+    <h1 class="text-2xl font-semibold mb-6">Cadastrar</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div>
+        <h2 class="text-lg font-medium mb-3">Aluno</h2>
+        <form id="alunoForm" class="space-y-3">
+          <input id="aluno_nome" placeholder="Nome" required class="w-full border rounded p-2" />
+          <input id="aluno_email" type="email" placeholder="Email" required class="w-full border rounded p-2" />
+          <input id="aluno_senha" type="password" placeholder="Senha" required class="w-full border rounded p-2" />
+          <input id="aluno_cpf" placeholder="CPF" class="w-full border rounded p-2" />
+          <input id="aluno_rg" placeholder="RG" class="w-full border rounded p-2" />
+          <input id="aluno_instituicao" placeholder="Instituição" class="w-full border rounded p-2" />
+          <input id="aluno_curso" placeholder="Curso" class="w-full border rounded p-2" />
+          <input id="aluno_endereco" placeholder="Endereço" class="w-full border rounded p-2" />
+          <div class="flex items-center gap-2">
+            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded">Cadastrar Aluno</button>
+            <span id="alunoMsg" class="text-sm text-red-600"></span>
+          </div>
+        </form>
+      </div>
+
+      <!-- Cadastro Empresa -->
+      <div>
+        <h2 class="text-lg font-medium mb-3">Empresa Parceira</h2>
+        <form id="empresaForm" class="space-y-3">
+          <input id="empresa_nome" placeholder="Nome" required class="w-full border rounded p-2" />
+          <input id="empresa_email" type="email" placeholder="Email" required class="w-full border rounded p-2" />
+          <input id="empresa_senha" type="password" placeholder="Senha" required class="w-full border rounded p-2" />
+          <input id="empresa_cnpj" placeholder="CNPJ" class="w-full border rounded p-2" />
+          <input id="empresa_endereco" placeholder="Endereço" class="w-full border rounded p-2" />
+          <div class="flex items-center gap-2">
+            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded">Cadastrar Empresa</button>
+            <span id="empresaMsg" class="text-sm text-red-600"></span>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <p class="mt-6 text-sm">Depois de cadastrar use a tela de <a href="index.html" class="text-indigo-600 hover:underline">login</a>.</p>
+  </div>
+
+  <script src="js/auth.js"></script>
+</body>
+</html>
