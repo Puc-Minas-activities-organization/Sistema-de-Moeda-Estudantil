@@ -6,6 +6,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (logoutBtn) logoutBtn.addEventListener('click', () => { apiHelpers.logoutAndRedirect(); });
 
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // Ler File como DataURL (base64)
+  function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (e) => reject(e);
+      reader.readAsDataURL(file);
+    });
+  }
+
   async function carregarPerfil() {
     try {
       const res = await fetch(apiHelpers.API_BASE + '/empresa/perfil', { headers: apiHelpers.authHeaders() });
@@ -100,6 +120,150 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // ===== Benefícios da empresa (criar / listar) =====
+  const beneficioForm = document.getElementById('beneficioForm');
+  const meusBeneficiosList = document.getElementById('meusBeneficiosList');
+  const refreshBeneficiosBtn = document.getElementById('refreshBeneficiosBtn');
+  const beneficioMsg = document.getElementById('beneficioMsg');
+
+  async function listarMeusBeneficios() {
+    if (!meusBeneficiosList) return;
+    try {
+      const res = await fetch(apiHelpers.API_BASE + '/empresa/beneficios', { headers: apiHelpers.authHeaders() });
+      if (!res.ok) { meusBeneficiosList.textContent = 'Erro ao listar benefícios'; return; }
+      const arr = await res.json();
+      if (!Array.isArray(arr) || arr.length === 0) { meusBeneficiosList.innerHTML = '<p class="text-sm text-gray-500">Nenhum benefício.</p>'; return; }
+
+      // renderizar cada benefício com um id no container para permitir substituir por formulário de edição
+      meusBeneficiosList.innerHTML = arr.map(b => `
+        <div id="ben-${b.id}" class="border rounded p-3 mb-2 flex gap-4 items-start">
+          <img src="${escapeHtml(b.foto) || 'https://via.placeholder.com/80x80?text=Sem'}" alt="foto" class="w-20 h-20 object-cover rounded" />
+          <div class="flex-1">
+            <div class="flex justify-between items-start">
+              <div>
+                <div class="font-semibold">${escapeHtml(b.nome)}</div>
+                <div class="text-sm text-gray-600">${escapeHtml(b.descricao || '')}</div>
+              </div>
+              <div class="text-sm text-gray-700"><strong>${b.custo}</strong> moedas</div>
+            </div>
+            <div class="mt-2 flex gap-2">
+              <button data-id="${b.id}" class="editarBenBtn px-2 py-1 bg-yellow-400 rounded">Editar</button>
+              <button data-id="${b.id}" class="delBenBtn px-2 py-1 bg-red-500 text-white rounded">Remover</button>
+            </div>
+          </div>
+        </div>
+      `).join('\n');
+
+      // attach actions
+      meusBeneficiosList.querySelectorAll('.delBenBtn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const id = e.currentTarget.getAttribute('data-id');
+          if (!confirm('Remover benefício id=' + id + '?')) return;
+          try {
+            const res = await fetch(apiHelpers.API_BASE + '/empresa/beneficios/' + id, { method: 'DELETE', headers: apiHelpers.authHeaders() });
+            if (!res.ok) { alert('Erro ao remover'); return; }
+            listarMeusBeneficios();
+          } catch (err) { alert('Erro: ' + err.message); }
+        });
+      });
+
+      // Editar: substituir o cartão pelo formulário de edição preenchido
+      meusBeneficiosList.querySelectorAll('.editarBenBtn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const id = e.currentTarget.getAttribute('data-id');
+          const ben = arr.find(x => String(x.id) === String(id));
+          const container = document.getElementById('ben-' + id);
+          if (!container) return;
+
+          container.innerHTML = `
+            <div class="w-full">
+              <form id="editForm-${id}" class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <input name="nome" placeholder="Nome" required class="w-full border rounded p-2" value="${escapeHtml(ben.nome)}" />
+                <input name="custo" type="number" step="0.01" placeholder="Custo" required class="w-full border rounded p-2" value="${ben.custo || 0}" />
+                <input name="foto" placeholder="URL da foto" class="w-full border rounded p-2" value="${escapeHtml(ben.foto || '')}" />
+                <input name="foto_file" type="file" accept="image/*" class="w-full border rounded p-2" />
+                <label class="flex items-center gap-2"><input name="ativo" type="checkbox" ${ben.ativo ? 'checked' : ''}/> Ativo</label>
+                <textarea name="descricao" placeholder="Descrição" rows="3" class="col-span-1 md:col-span-2 w-full border rounded p-2">${escapeHtml(ben.descricao || '')}</textarea>
+                <div class="col-span-1 md:col-span-2 flex gap-2">
+                  <button type="submit" class="px-3 py-1 bg-indigo-600 text-white rounded">Salvar</button>
+                  <button type="button" id="cancelEdit-${id}" class="px-3 py-1 bg-gray-300 rounded">Cancelar</button>
+                </div>
+              </form>
+              <div id="editMsg-${id}" class="text-sm mt-2 text-red-600"></div>
+            </div>
+          `;
+
+          // submit handler
+          const editForm = document.getElementById(`editForm-${id}`);
+          const editMsg = document.getElementById(`editMsg-${id}`);
+          document.getElementById(`cancelEdit-${id}`).addEventListener('click', () => { listarMeusBeneficios(); });
+
+          editForm.addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            editMsg.textContent = '';
+            try {
+              const formData = new FormData(editForm);
+              // se o usuário subiu um arquivo, priorizamos ele
+              let fotoVal = formData.get('foto');
+              const fileInput = editForm.querySelector('[name=foto_file]');
+              if (fileInput && fileInput.files && fileInput.files[0]) {
+                fotoVal = await readFileAsDataURL(fileInput.files[0]);
+              }
+              const body = {
+                nome: formData.get('nome'),
+                custo: parseFloat(formData.get('custo') || 0),
+                descricao: formData.get('descricao'),
+                foto: fotoVal,
+                ativo: editForm.querySelector('[name=ativo]').checked
+              };
+              const res = await fetch(apiHelpers.API_BASE + '/empresa/beneficios/' + id, {
+                method: 'PUT', headers: Object.assign({}, apiHelpers.authHeaders()), body: JSON.stringify(body)
+              });
+              const d = await res.json().catch(() => ({}));
+              if (!res.ok) { editMsg.textContent = d.message || d.error || 'Erro ao atualizar benefício'; return; }
+              // sucesso: recarregar lista
+              listarMeusBeneficios();
+            } catch (err) { editMsg.textContent = 'Erro: ' + err.message; }
+          });
+        });
+      });
+
+    } catch (err) { meusBeneficiosList.textContent = 'Erro: ' + err.message; }
+  }
+
+  if (refreshBeneficiosBtn) refreshBeneficiosBtn.addEventListener('click', listarMeusBeneficios);
+
+  if (beneficioForm) {
+    beneficioForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      beneficioMsg.textContent = '';
+      const nome = document.getElementById('beneficio_nome').value;
+      const custo = parseFloat(document.getElementById('beneficio_custo').value || 0);
+      const fotoUrl = document.getElementById('beneficio_foto').value;
+      const fotoFileEl = document.getElementById('beneficio_foto_file');
+      let foto = fotoUrl;
+      if (fotoFileEl && fotoFileEl.files && fotoFileEl.files[0]) {
+        try {
+          foto = await readFileAsDataURL(fotoFileEl.files[0]);
+        } catch (err) {
+          beneficioMsg.textContent = 'Erro ao ler arquivo: ' + err.message; return;
+        }
+      }
+      const descricao = document.getElementById('beneficio_descricao').value;
+      const ativo = document.getElementById('beneficio_ativo').checked;
+      try {
+        const body = { nome, custo, descricao, foto, ativo };
+        const res = await fetch(apiHelpers.API_BASE + '/empresa/beneficios', { method: 'POST', headers: apiHelpers.authHeaders(), body: JSON.stringify(body) });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) { beneficioMsg.textContent = data.message || data.error || 'Erro ao cadastrar benefício'; return; }
+        beneficioMsg.classList.remove('text-red-600'); beneficioMsg.classList.add('text-green-600');
+        beneficioMsg.textContent = 'Benefício cadastrado com sucesso.';
+        beneficioForm.reset();
+        listarMeusBeneficios();
+      } catch (err) { beneficioMsg.textContent = 'Erro de conexão: ' + err.message; }
+    });
+  }
+
   async function listarEmpresas() {
     try {
       const res = await fetch(apiHelpers.API_BASE + '/empresa/todas');
@@ -161,4 +325,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
   carregarPerfil();
   listarEmpresas();
+  listarMeusBeneficios();
 });

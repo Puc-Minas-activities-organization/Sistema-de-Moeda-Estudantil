@@ -21,6 +21,28 @@
     </section>
 
     <section class="mb-6 bg-white p-4 rounded shadow">
+      <h2 class="font-medium mb-2">Meus Benefícios</h2>
+      <form id="beneficioForm" class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+        <input id="beneficio_nome" placeholder="Nome do benefício" required class="w-full border rounded p-2" />
+        <input id="beneficio_custo" type="number" step="0.01" placeholder="Custo (moedas)" required class="w-full border rounded p-2" />
+        <input id="beneficio_foto" placeholder="URL da foto (opcional)" class="w-full border rounded p-2" />
+        <input id="beneficio_foto_file" type="file" accept="image/*" class="w-full border rounded p-2" />
+        <div class="flex items-center gap-2">
+          <input id="beneficio_ativo" type="checkbox" class="h-4 w-4" />
+          <label for="beneficio_ativo" class="text-sm">Ativo</label>
+        </div>
+        <textarea id="beneficio_descricao" placeholder="Descrição" rows="3" class="col-span-1 md:col-span-2 w-full border rounded p-2"></textarea>
+        <div class="col-span-1 md:col-span-2 flex gap-2">
+          <button type="submit" class="px-3 py-1 bg-green-600 text-white rounded">Cadastrar benefício</button>
+          <button type="button" id="refreshBeneficiosBtn" class="px-3 py-1 bg-indigo-600 text-white rounded">Atualizar meus benefícios</button>
+          <span id="beneficioMsg" class="text-sm text-red-600"></span>
+        </div>
+      </form>
+
+      <div id="meusBeneficiosList"></div>
+    </section>
+
+    <section class="mb-6 bg-white p-4 rounded shadow">
       <h2 class="font-medium mb-2">Empresas (CRUD público)</h2>
       <div class="mb-3">
         <button id="refreshEmpresas" class="px-3 py-1 bg-indigo-600 text-white rounded">Atualizar Lista</button>

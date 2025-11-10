@@ -168,8 +168,60 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // ===== Benefícios disponíveis para alunos =====
+  const beneficiosListEl = document.getElementById('beneficiosList');
+  const refreshBeneficiosAlunoBtn = document.getElementById('refreshBeneficiosAluno');
+
+  async function listarBeneficiosAluno() {
+    if (!beneficiosListEl) return;
+    try {
+      const res = await fetch(apiHelpers.API_BASE + '/aluno/beneficios', { headers: apiHelpers.authHeaders() });
+      if (!res.ok) {
+        if (res.status === 401) { apiHelpers.logoutAndRedirect(); return; }
+        beneficiosListEl.textContent = 'Erro ao listar benefícios'; return;
+      }
+      const arr = await res.json();
+      if (!Array.isArray(arr) || arr.length === 0) { beneficiosListEl.innerHTML = '<p class="text-sm text-gray-500">Nenhum benefício disponível.</p>'; return; }
+
+      beneficiosListEl.innerHTML = arr.map(b => `
+        <div class="border rounded p-3 mb-3 flex gap-4 items-start bg-white">
+          <img src="${b.foto || 'https://via.placeholder.com/100x100?text=Sem'}" alt="foto" class="w-24 h-24 object-cover rounded" />
+          <div class="flex-1">
+            <div class="flex justify-between items-start">
+              <div>
+                <div class="font-semibold">${b.nome}</div>
+                <div class="text-sm text-gray-600">${b.descricao || ''}</div>
+              </div>
+              <div class="text-sm text-gray-700"><strong>${b.custo}</strong> moedas</div>
+            </div>
+            <div class="mt-3">
+              <button data-id="${b.id}" class="resgatarBtn px-3 py-1 bg-green-600 text-white rounded">Resgatar</button>
+            </div>
+          </div>
+        </div>
+      `).join('\n');
+
+      beneficiosListEl.querySelectorAll('.resgatarBtn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const id = e.currentTarget.getAttribute('data-id');
+          if (!confirm('Deseja resgatar este benefício?')) return;
+          try {
+            const res = await fetch(apiHelpers.API_BASE + '/aluno/resgatar/' + id, { method: 'POST', headers: apiHelpers.authHeaders() });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) { alert(data.message || 'Erro ao resgatar'); return; }
+            alert('Resgate solicitado: ' + (data?.message || 'Verifique histórico')); 
+          } catch (err) { alert('Erro: ' + err.message); }
+        });
+      });
+
+    } catch (err) { beneficiosListEl.textContent = 'Erro: ' + err.message; }
+  }
+
+  if (refreshBeneficiosAlunoBtn) refreshBeneficiosAlunoBtn.addEventListener('click', listarBeneficiosAluno);
+
   if (refreshBtn) refreshBtn.addEventListener('click', listarAlunos);
 
   carregarPerfil();
   listarAlunos();
+  listarBeneficiosAluno();
 });
