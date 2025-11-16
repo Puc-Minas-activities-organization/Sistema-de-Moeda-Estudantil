@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Painel Professor - Moeda Estudantil</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+  <div class="max-w-5xl mx-auto p-6">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-semibold">Painel do Professor</h1>
+      <div>
+        <button id="logoutBtn" class="px-3 py-1 bg-red-500 text-white rounded">Sair</button>
+      </div>
+    </div>
+
+    <section class="mb-6 bg-white p-4 rounded shadow">
+      <h2 class="font-medium mb-2">Meu Perfil</h2>
+      <div id="perfil"></div>
+    </section>
+
+    <section class="mb-6 bg-white p-4 rounded shadow">
+      <h2 class="font-medium mb-2">Enviar Moedas</h2>
+      <form id="enviarMoedasForm" class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+        <input id="aluno_email" placeholder="Email do aluno" required class="w-full border rounded p-2" />
+        <input id="valor" type="number" step="0.01" placeholder="Valor (moedas)" required class="w-full border rounded p-2" />
+        <button type="submit" class="px-3 py-1 bg-indigo-600 text-white rounded col-span-1 md:col-span-2">Enviar</button>
+        <div id="enviarMoedasMsg" class="col-span-1 md:col-span-2 text-sm text-red-600 mt-2"></div>
+      </form>
+    </section>
+
+    <section class="mb-6 bg-white p-4 rounded shadow">
+      <h2 class="font-medium mb-2">Extrato</h2>
+      <div id="extrato"></div>
+    </section>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/professor.js"></script>
+</body>
+</html>

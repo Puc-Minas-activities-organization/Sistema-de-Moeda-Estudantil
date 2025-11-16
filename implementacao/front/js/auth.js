@@ -29,8 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
           window.location.href = 'aluno.html';
         } else if (role.includes('EMPRESA')) {
           window.location.href = 'empresa.html';
+        } else if (role.includes('PROFESSOR')) {
+          window.location.href = 'professor.html';
         } else {
-
           window.location.href = 'aluno.html';
         }
       } catch (err) {
