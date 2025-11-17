@@ -14,6 +14,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!res.ok) {
         if (res.status === 401) { apiHelpers.logoutAndRedirect(); return; }
         perfilEl.textContent = 'Erro ao carregar perfil';
+        function formatDate(iso) {
+          if (!iso) return '-';
+          const d = new Date(iso);
+          return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }) +
+            ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        }
         return;
       }
       const data = await res.json();
@@ -37,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div><strong>Instituição:</strong> ${data.instituicao || '-'}</div>
             <div><strong>Curso:</strong> ${data.curso || '-'}</div>
             <div class="col-span-2"><strong>Endereço:</strong> ${data.endereco || '-'}</div>
+            <div class="col-span-2 text-green-600"><strong class="text-gray-700">Saldo Moedas:</strong> ${data.saldoMoedas || '-'}</div>
           </div>
 
           <div id="perfilMsg" class="mt-3 text-sm"></div>
@@ -210,6 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json().catch(() => ({}));
             if (!res.ok) { alert(data.message || 'Erro ao resgatar'); return; }
             alert('Resgate solicitado: ' + (data?.message || 'Verifique histórico')); 
+              carregarExtrato(); // Atualiza extrato após resgate
           } catch (err) { alert('Erro: ' + err.message); }
         });
       });
@@ -224,4 +232,60 @@ document.addEventListener('DOMContentLoaded', () => {
   carregarPerfil();
   listarAlunos();
   listarBeneficiosAluno();
+    carregarExtrato();
+  
+    async function carregarExtrato() {
+      const extratoEl = document.getElementById('extrato');
+      if (!extratoEl) return;
+      try {
+        const res = await fetch(apiHelpers.API_BASE + '/aluno/extrato', { headers: apiHelpers.authHeaders() });
+        if (!res.ok) {
+          extratoEl.innerHTML = '<span class="text-red-600">Erro ao carregar extrato</span>';
+          return;
+        }
+        const data = await res.json();
+        if (!data.transacoes || !Array.isArray(data.transacoes)) {
+          extratoEl.innerHTML = '<span class="text-gray-600">Nenhuma transação encontrada.</span>';
+          return;
+        }
+        function formatDate(iso) {
+          if (!iso) return '-';
+          const d = new Date(iso);
+          return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }) +
+            ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        }
+        const extratoCards = data.transacoes.map(tx => {
+          const dataFormatada = tx.dataTransacao ? formatDate(tx.dataTransacao) : (tx.data ? formatDate(tx.data) : '-');
+          let participante = '';
+          if (tx.professorNome || tx.professorEmail) {
+            participante = `<span class='text-indigo-700'>Professor: ${tx.professorNome || ''} (${tx.professorEmail || ''})</span>`;
+          } else if (tx.empresaNome) {
+            participante = `<span class='text-green-700'>Empresa: ${tx.empresaNome}</span>`;
+          }
+          let tipo = '';
+          if (tx.tipoTransacao === 'RECEBIMENTO' || tx.tipo === 'RECEBIMENTO') {
+            tipo = '<span class="text-green-600">Recebimento</span>';
+          } else if (tx.tipoTransacao === 'ENVIO' || tx.tipo === 'ENVIO') {
+            tipo = '<span class="text-blue-600">Envio</span>';
+          } else if (tx.tipoTransacao === 'RESGATE' || tx.tipo === 'RESGATE') {
+            tipo = '<span class="text-yellow-600">Resgate</span>';
+          } else {
+            tipo = tx.tipo || '';
+          }
+          const mensagem = tx.mensagem ? `<div class='text-gray-600'>Motivo: ${tx.mensagem}</div>` : '';
+          return `<div class="bg-white rounded shadow p-3 mb-2 border border-slate-200">
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-xs text-gray-500">${dataFormatada}</span>
+              <span class="font-semibold">${tipo}</span>
+            </div>
+            <div class="mb-1"><strong>Valor:</strong> <span class="${tx.valor < 0 ? 'text-red-600' : 'text-green-600'}">${tx.valor}</span></div>
+            <div class="mb-1">${participante}</div>
+            ${mensagem}
+          </div>`;
+        }).join('');
+        extratoEl.innerHTML = `<div class="max-h-96 overflow-y-auto">${extratoCards}</div>`;
+      } catch (err) {
+        extratoEl.innerHTML = '<span class="text-red-600">Erro ao carregar extrato</span>';
+      }
+    }
 });
