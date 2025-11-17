@@ -195,16 +195,18 @@ public class AlunoController {
     }
   }
 
-  // ========== CRUD PÚBLICO ==========
+  // ========== CRUD PROTEGIDO ==========
 
-  /** Listar todos os alunos GET /api/aluno/todos */
+  /** Listar todos os alunos GET /api/aluno/todos (apenas ADMIN) */
   @GetMapping("/todos")
+  @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<List<Aluno>> listarTodosAlunos() {
     return ResponseEntity.ok(alunoRepository.findAll());
   }
 
-  /** Buscar aluno por ID GET /api/aluno/{id} */
+  /** Buscar aluno por ID GET /api/aluno/{id} (apenas o próprio aluno ou ADMIN) */
   @GetMapping("/{id}")
+  @PreAuthorize("hasRole('ADMIN') or (hasRole('ALUNO') and #id == authentication.principal.id)")
   public ResponseEntity<?> buscarAlunoPorId(@PathVariable Long id) {
     return alunoRepository
         .findById(id)
@@ -212,8 +214,9 @@ public class AlunoController {
         .orElse(ResponseEntity.notFound().build());
   }
 
-  /** Atualizar aluno por ID (público - qualquer um pode atualizar) PUT /api/aluno/{id} */
+  /** Atualizar aluno por ID (apenas o próprio aluno ou ADMIN) PUT /api/aluno/{id} */
   @PutMapping("/{id}")
+  @PreAuthorize("hasRole('ADMIN') or (hasRole('ALUNO') and #id == authentication.principal.id)")
   public ResponseEntity<?> atualizarAluno(
       @PathVariable Long id, @RequestBody AtualizarAlunoAdminRequest request) {
     return alunoRepository
@@ -234,8 +237,9 @@ public class AlunoController {
         .orElse(ResponseEntity.notFound().build());
   }
 
-  /** Deletar aluno DELETE /api/aluno/{id} */
+  /** Deletar aluno DELETE /api/aluno/{id} (apenas o próprio aluno ou ADMIN) */
   @DeleteMapping("/{id}")
+  @PreAuthorize("hasRole('ADMIN') or (hasRole('ALUNO') and #id == authentication.principal.id)")
   public ResponseEntity<?> deletarAluno(@PathVariable Long id) {
     if (!alunoRepository.existsById(id)) {
       return ResponseEntity.notFound().build();

@@ -168,16 +168,18 @@ public class EmpresaController {
         }
     }
 
-    // ========== CRUD PÚBLICO (sem autenticação) ==========
+    // ========== CRUD PROTEGIDO ==========
 
-    /** Listar todas as empresas GET /api/empresa/todas */
+    /** Listar todas as empresas GET /api/empresa/todas (apenas ADMIN) */
     @GetMapping("/todas")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<EmpresaParceira>> listarTodasEmpresas() {
         return ResponseEntity.ok(empresaRepository.findAll());
     }
 
-    /** Buscar empresa por ID GET /api/empresa/{id} */
+    /** Buscar empresa por ID GET /api/empresa/{id} (apenas a própria empresa ou ADMIN) */
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('EMPRESA_PARCEIRA') and #id == authentication.principal.id)")
     public ResponseEntity<?> buscarEmpresaPorId(@PathVariable Long id) {
         return empresaRepository
                 .findById(id)
@@ -186,10 +188,10 @@ public class EmpresaController {
     }
 
     /**
-     * Atualizar empresa por ID (público - qualquer um pode atualizar) PUT
-     * /api/empresa/{id}
+     * Atualizar empresa por ID (apenas a própria empresa ou ADMIN) PUT /api/empresa/{id}
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('EMPRESA_PARCEIRA') and #id == authentication.principal.id)")
     public ResponseEntity<?> atualizarEmpresa(
             @PathVariable Long id, @RequestBody AtualizarEmpresaAdminRequest request) {
         return empresaRepository
@@ -208,8 +210,9 @@ public class EmpresaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /** Deletar empresa DELETE /api/empresa/{id} */
+    /** Deletar empresa DELETE /api/empresa/{id} (apenas a própria empresa ou ADMIN) */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('EMPRESA_PARCEIRA') and #id == authentication.principal.id)")
     public ResponseEntity<?> deletarEmpresa(@PathVariable Long id) {
         if (!empresaRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
