@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface NotificacaoRepository extends JpaRepository<Notificacao, Long> {
@@ -24,4 +25,9 @@ public interface NotificacaoRepository extends JpaRepository<Notificacao, Long> 
      * Conta notificações não lidas
      */
     Long countByUsuarioAndLidaFalse(Usuario usuario);
+    
+    /**
+     * Busca notificação por usuário e código de referência (código de resgate)
+     */
+    Optional<Notificacao> findByUsuarioAndCodigoReferencia(Usuario usuario, String codigoReferencia);
 }
