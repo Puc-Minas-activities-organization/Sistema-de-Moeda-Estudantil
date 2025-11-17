@@ -73,6 +73,8 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.DELETE, "/api/empresa/{id}")
                     .permitAll()
 
+                    .requestMatchers("/api/test/email/**").permitAll()
+
                     // Endpoints de Professor - apenas PROFESSOR
                     .requestMatchers("/api/professor/**")
                     .hasRole("PROFESSOR")
