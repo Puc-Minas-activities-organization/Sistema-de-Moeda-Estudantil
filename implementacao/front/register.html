@@ -19,8 +19,24 @@
           <input id="aluno_senha" type="password" placeholder="Senha" required class="w-full border rounded p-2" />
           <input id="aluno_cpf" placeholder="CPF" class="w-full border rounded p-2" />
           <input id="aluno_rg" placeholder="RG" class="w-full border rounded p-2" />
-          <input id="aluno_instituicao" placeholder="Instituição" class="w-full border rounded p-2" />
-          <input id="aluno_curso" placeholder="Curso" class="w-full border rounded p-2" />
+          <select id="aluno_instituicao" class="w-full border rounded p-2" required>
+            <option value="">Selecione a instituição</option>
+            <option value="PUC Minas">PUC Minas</option>
+            <option value="UFMG">UFMG</option>
+            <option value="UNA">UNA</option>
+            <option value="FUMEC">FUMEC</option>
+            <option value="Newton Paiva">Newton Paiva</option>
+          </select>
+          <select id="aluno_curso" class="w-full border rounded p-2" required>
+            <option value="">Selecione o curso</option>
+            <option value="Matemática">Matemática</option>
+            <option value="Física">Física</option>
+            <option value="Química">Química</option>
+            <option value="Engenharia">Engenharia</option>
+            <option value="Direito">Direito</option>
+            <option value="Administração">Administração</option>
+            <option value="Ciência da Computação">Ciência da Computação</option>
+          </select>
           <input id="aluno_endereco" placeholder="Endereço" class="w-full border rounded p-2" />
           <div class="flex items-center gap-2">
             <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded">Cadastrar Aluno</button>

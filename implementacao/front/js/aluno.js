@@ -179,6 +179,45 @@ document.addEventListener('DOMContentLoaded', () => {
   const beneficiosListEl = document.getElementById('beneficiosList');
   const refreshBeneficiosAlunoBtn = document.getElementById('refreshBeneficiosAluno');
 
+    const meusResgatesListEl = document.getElementById('meusResgatesList');
+    const refreshMeusResgatesBtn = document.getElementById('refreshMeusResgates');
+  // ===== Meus Resgates (benefícios adquiridos) =====
+  async function listarMeusResgates() {
+    if (!meusResgatesListEl) return;
+    meusResgatesListEl.innerHTML = '<span class="text-gray-500">Carregando...</span>';
+    try {
+      const res = await fetch(apiHelpers.API_BASE + '/aluno/meus-resgates', { headers: apiHelpers.authHeaders() });
+      if (!res.ok) {
+        if (res.status === 401) { apiHelpers.logoutAndRedirect(); return; }
+        meusResgatesListEl.textContent = 'Erro ao listar resgates'; return;
+      }
+      const arr = await res.json();
+      window.meusResgatesCache = Array.isArray(arr) ? arr : [];
+      if (!Array.isArray(arr) || arr.length === 0) {
+        meusResgatesListEl.innerHTML = '<p class="text-sm text-gray-500">Nenhum resgate realizado.</p>';
+        return;
+      }
+      meusResgatesListEl.innerHTML = arr.map(r => `
+        <div class="border rounded p-3 mb-3 flex gap-4 items-start bg-white">
+          <img src="${r.beneficio?.foto || 'https://via.placeholder.com/100x100?text=Sem'}" alt="foto" class="w-20 h-20 object-cover rounded" />
+          <div class="flex-1">
+            <div class="flex justify-between items-start">
+              <div>
+                <div class="font-semibold">${r.beneficio?.nome || 'Benefício'}</div>
+                <div class="text-sm text-gray-600">${r.beneficio?.descricao || ''}</div>
+              </div>
+              <div class="text-sm text-gray-700"><strong>${r.valorPago}</strong> moedas</div>
+            </div>
+            <div class="mt-2 text-sm text-gray-700">Código: <span class="font-mono">${r.codigoResgate}</span></div>
+            <div class="mt-1 text-sm text-gray-700">Data: ${new Date(r.dataResgate).toLocaleString('pt-BR')}</div>
+          </div>
+        </div>
+      `).join('\n');
+    } catch (err) {
+      meusResgatesListEl.textContent = 'Erro: ' + err.message;
+    }
+  }
+
   async function listarBeneficiosAluno() {
     if (!beneficiosListEl) return;
     try {
@@ -190,23 +229,25 @@ document.addEventListener('DOMContentLoaded', () => {
       const arr = await res.json();
       if (!Array.isArray(arr) || arr.length === 0) { beneficiosListEl.innerHTML = '<p class="text-sm text-gray-500">Nenhum benefício disponível.</p>'; return; }
 
-      beneficiosListEl.innerHTML = arr.map(b => `
-        <div class="border rounded p-3 mb-3 flex gap-4 items-start bg-white">
-          <img src="${b.foto || 'https://via.placeholder.com/100x100?text=Sem'}" alt="foto" class="w-24 h-24 object-cover rounded" />
-          <div class="flex-1">
-            <div class="flex justify-between items-start">
-              <div>
-                <div class="font-semibold">${b.nome}</div>
-                <div class="text-sm text-gray-600">${b.descricao || ''}</div>
+      beneficiosListEl.innerHTML = arr.map(b => {
+        return `
+          <div class="border rounded p-3 mb-3 flex gap-4 items-start bg-white">
+            <img src="${b.foto || 'https://via.placeholder.com/100x100?text=Sem'}" alt="foto" class="w-24 h-24 object-cover rounded" />
+            <div class="flex-1">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-semibold">${b.nome}</div>
+                  <div class="text-sm text-gray-600">${b.descricao || ''}</div>
+                </div>
+                <div class="text-sm text-gray-700"><strong>${b.custo}</strong> moedas</div>
               </div>
-              <div class="text-sm text-gray-700"><strong>${b.custo}</strong> moedas</div>
-            </div>
-            <div class="mt-3">
-              <button data-id="${b.id}" class="resgatarBtn px-3 py-1 bg-green-600 text-white rounded">Resgatar</button>
+              <div class="mt-3">
+                <button data-id="${b.id}" class="resgatarBtn px-3 py-1 bg-green-600 text-white rounded">Resgatar</button>
+              </div>
             </div>
           </div>
-        </div>
-      `).join('\n');
+        `;
+      }).join('\n');
 
       beneficiosListEl.querySelectorAll('.resgatarBtn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
@@ -216,8 +257,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await fetch(apiHelpers.API_BASE + '/aluno/resgatar/' + id, { method: 'POST', headers: apiHelpers.authHeaders() });
             const data = await res.json().catch(() => ({}));
             if (!res.ok) { alert(data.message || 'Erro ao resgatar'); return; }
-            alert('Resgate solicitado: ' + (data?.message || 'Verifique histórico')); 
-              carregarExtrato(); // Atualiza extrato após resgate
+            alert('Resgate solicitado: ' + (data?.message || 'Verifique histórico'));
+            await listarMeusResgates();
+            await listarBeneficiosAluno();
+            await carregarExtrato();
           } catch (err) { alert('Erro: ' + err.message); }
         });
       });
@@ -227,65 +270,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (refreshBeneficiosAlunoBtn) refreshBeneficiosAlunoBtn.addEventListener('click', listarBeneficiosAluno);
 
+    if (refreshMeusResgatesBtn) refreshMeusResgatesBtn.addEventListener('click', listarMeusResgates);
+
   if (refreshBtn) refreshBtn.addEventListener('click', listarAlunos);
 
   carregarPerfil();
   listarAlunos();
   listarBeneficiosAluno();
+    listarMeusResgates();
     carregarExtrato();
-  
+
     async function carregarExtrato() {
       const extratoEl = document.getElementById('extrato');
       if (!extratoEl) return;
+      extratoEl.innerHTML = '<span class="text-gray-500">Carregando...</span>';
       try {
         const res = await fetch(apiHelpers.API_BASE + '/aluno/extrato', { headers: apiHelpers.authHeaders() });
         if (!res.ok) {
-          extratoEl.innerHTML = '<span class="text-red-600">Erro ao carregar extrato</span>';
+          if (res.status === 401) { apiHelpers.logoutAndRedirect(); return; }
+          extratoEl.textContent = 'Erro ao carregar extrato'; return;
+        }
+        const arr = await res.json();
+        if (!arr || !Array.isArray(arr.transacoes) || arr.transacoes.length === 0) {
+          extratoEl.innerHTML = '<p class="text-sm text-gray-500">Nenhuma transação encontrada.</p>';
           return;
         }
-        const data = await res.json();
-        if (!data.transacoes || !Array.isArray(data.transacoes)) {
-          extratoEl.innerHTML = '<span class="text-gray-600">Nenhuma transação encontrada.</span>';
-          return;
-        }
-        function formatDate(iso) {
-          if (!iso) return '-';
-          const d = new Date(iso);
-          return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }) +
-            ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-        }
-        const extratoCards = data.transacoes.map(tx => {
-          const dataFormatada = tx.dataTransacao ? formatDate(tx.dataTransacao) : (tx.data ? formatDate(tx.data) : '-');
-          let participante = '';
-          if (tx.professorNome || tx.professorEmail) {
-            participante = `<span class='text-indigo-700'>Professor: ${tx.professorNome || ''} (${tx.professorEmail || ''})</span>`;
-          } else if (tx.empresaNome) {
-            participante = `<span class='text-green-700'>Empresa: ${tx.empresaNome}</span>`;
-          }
-          let tipo = '';
-          if (tx.tipoTransacao === 'RECEBIMENTO' || tx.tipo === 'RECEBIMENTO') {
-            tipo = '<span class="text-green-600">Recebimento</span>';
-          } else if (tx.tipoTransacao === 'ENVIO' || tx.tipo === 'ENVIO') {
-            tipo = '<span class="text-blue-600">Envio</span>';
-          } else if (tx.tipoTransacao === 'RESGATE' || tx.tipo === 'RESGATE') {
-            tipo = '<span class="text-yellow-600">Resgate</span>';
-          } else {
-            tipo = tx.tipo || '';
-          }
-          const mensagem = tx.mensagem ? `<div class='text-gray-600'>Motivo: ${tx.mensagem}</div>` : '';
-          return `<div class="bg-white rounded shadow p-3 mb-2 border border-slate-200">
-            <div class="flex justify-between items-center mb-1">
-              <span class="text-xs text-gray-500">${dataFormatada}</span>
-              <span class="font-semibold">${tipo}</span>
+        extratoEl.innerHTML = arr.transacoes.map(item => `
+          <div class="border rounded p-3 mb-2 flex justify-between items-center bg-white">
+            <div>
+              <div class="font-semibold">${item.tipo === 'RESGATE' ? 'Resgate' : 'Recebimento'}</div>
+              <div class="text-sm text-gray-600">${item.descricao || ''}</div>
+              <div class="text-xs text-gray-500">${new Date(item.data).toLocaleString('pt-BR')}</div>
             </div>
-            <div class="mb-1"><strong>Valor:</strong> <span class="${tx.valor < 0 ? 'text-red-600' : 'text-green-600'}">${tx.valor}</span></div>
-            <div class="mb-1">${participante}</div>
-            ${mensagem}
-          </div>`;
-        }).join('');
-        extratoEl.innerHTML = `<div class="max-h-96 overflow-y-auto">${extratoCards}</div>`;
+            <div class="font-mono text-right ${item.valor < 0 ? 'text-red-600' : 'text-green-600'}">${item.valor < 0 ? '-' : '+'}${Math.abs(item.valor)} moedas</div>
+          </div>
+        `).join('\n');
       } catch (err) {
-        extratoEl.innerHTML = '<span class="text-red-600">Erro ao carregar extrato</span>';
+        extratoEl.textContent = 'Erro: ' + err.message;
       }
     }
 });
