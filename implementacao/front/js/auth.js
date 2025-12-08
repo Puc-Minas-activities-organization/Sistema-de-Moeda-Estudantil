@@ -1,30 +1,28 @@
-const API_BASE = 'http://localhost:8080/api'; 
+const API_BASE = 'http://localhost:8080/api';
 
 document.addEventListener('DOMContentLoaded', () => {
+
+  // ---------------------------------------
+  // LOGIN
+  // ---------------------------------------
   const loginForm = document.getElementById('loginForm');
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+
       const email = document.getElementById('email').value;
       const senha = document.getElementById('senha').value;
       const msg = document.getElementById('msg');
+
       try {
-        const res = await fetch(API_BASE + '/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, senha })
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          msg.textContent = data.message || (data.error || 'Erro no login');
-          return;
-        }
-        // Salvar token e role
+        const data = await api.post('/auth/login', { email, senha });
+
+        // Salva token e role
         localStorage.setItem('token', data.token);
         localStorage.setItem('role', data.role || data.tipo || '');
 
-      
         const role = data.role || data.tipo || '';
+
         if (role.includes('ALUNO')) {
           window.location.href = 'aluno.html';
         } else if (role.includes('EMPRESA')) {
@@ -34,17 +32,21 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           window.location.href = 'aluno.html';
         }
+
       } catch (err) {
-        msg.textContent = 'Erro de conexão: ' + err.message;
+        msg.textContent = err.message || 'Erro no login';
       }
     });
   }
 
-
+  // ---------------------------------------
+  // CADASTRO ALUNO
+  // ---------------------------------------
   const alunoForm = document.getElementById('alunoForm');
   if (alunoForm) {
     alunoForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+
       const nome = document.getElementById('aluno_nome').value;
       const email = document.getElementById('aluno_email').value;
       const senha = document.getElementById('aluno_senha').value;
@@ -53,72 +55,67 @@ document.addEventListener('DOMContentLoaded', () => {
       const instituicao = document.getElementById('aluno_instituicao').value;
       const curso = document.getElementById('aluno_curso').value;
       const endereco = document.getElementById('aluno_endereco').value;
+
       const msgEl = document.getElementById('alunoMsg');
       msgEl.textContent = '';
+
       try {
-     
         const body = { email, senha, cpf, rg, nome, instituicao, curso, endereco };
-        const res = await fetch(API_BASE + '/usuarios/cadastrar/aluno', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-        const data = await res.json();
-        if (!res.ok) {
-        
-          msgEl.textContent = data.message || data.error || JSON.stringify(data) || 'Erro ao cadastrar';
-          return;
-        }
+
+        await api.post('/usuarios/cadastrar/aluno', body);
+
         msgEl.classList.remove('text-red-600');
         msgEl.classList.add('text-green-600');
         msgEl.textContent = 'Aluno cadastrado com sucesso! Faça login.';
+
       } catch (err) {
-        msgEl.textContent = 'Erro de conexão: ' + err.message;
+        msgEl.textContent = err.message || 'Erro ao cadastrar aluno';
       }
     });
   }
 
+  // ---------------------------------------
+  // CADASTRO EMPRESA
+  // ---------------------------------------
   const empresaForm = document.getElementById('empresaForm');
   if (empresaForm) {
     empresaForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+
       const nome = document.getElementById('empresa_nome').value;
       const email = document.getElementById('empresa_email').value;
       const senha = document.getElementById('empresa_senha').value;
       const cnpj = document.getElementById('empresa_cnpj').value;
       const endereco = document.getElementById('empresa_endereco').value;
+
       const msgEl = document.getElementById('empresaMsg');
       msgEl.textContent = '';
+
       try {
-      
         const body = { email, senha, cnpj, nome, endereco };
-        const res = await fetch(API_BASE + '/usuarios/cadastrar/empresa', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          msgEl.textContent = data.message || data.error || JSON.stringify(data) || 'Erro ao cadastrar';
-          return;
-        }
+
+        await api.post('/usuarios/cadastrar/empresa', body);
+
         msgEl.classList.remove('text-red-600');
         msgEl.classList.add('text-green-600');
         msgEl.textContent = 'Empresa cadastrada com sucesso! Faça login.';
+
       } catch (err) {
-        msgEl.textContent = 'Erro de conexão: ' + err.message;
+        msgEl.textContent = err.message || 'Erro ao cadastrar empresa';
       }
     });
   }
 });
 
 
+// ---------------------------------------
+// Helpers
+// ---------------------------------------
 function authHeaders() {
   const token = localStorage.getItem('token');
   if (!token) return { 'Content-Type': 'application/json' };
   return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
 }
-
 
 function logoutAndRedirect() {
   localStorage.removeItem('token');
