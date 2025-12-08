@@ -13,6 +13,9 @@ import com.puc.moeda.services.BeneficioService;
 import com.puc.moeda.services.ExtratoService;
 import com.puc.moeda.services.HistoricoNotificacaoService;
 import com.puc.moeda.services.ResgateService;
+
+import com.puc.moeda.dto.response.*;
+
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,16 +26,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/aluno")
 public class AlunoController {
-  @Autowired AlunoService alunoService;
 
+  @Autowired private AlunoService alunoService;
   @Autowired private BeneficioService beneficioService;
-
   @Autowired private ResgateService resgateService;
-
   @Autowired private ExtratoService extratoService;
-
   @Autowired private AlunoRepository alunoRepository;
-
   @Autowired private HistoricoNotificacaoService historicoNotificacaoService;
 
   @DeleteMapping("/deletar-conta")
@@ -47,21 +46,17 @@ public class AlunoController {
     }
   }
 
-
-  /** Listar benefícios disponíveis GET /api/aluno/beneficios */
   @GetMapping("/beneficios")
   @PreAuthorize("hasRole('ALUNO')")
   public ResponseEntity<?> listarBeneficios() {
     try {
-      List<Beneficio> beneficios = beneficioService.listarBeneficiosAtivos();
-      return ResponseEntity.ok(beneficios);
+      return ResponseEntity.ok(beneficioService.listarBeneficiosAtivos());
     } catch (Exception e) {
       return ResponseEntity.badRequest()
           .body(new ErrorResponse("Erro ao listar benefícios: " + e.getMessage()));
     }
   }
 
-  /** Resgatar benefício POST /api/aluno/resgatar/{beneficioId} */
   @PostMapping("/resgatar/{beneficioId}")
   @PreAuthorize("hasRole('ALUNO')")
   public ResponseEntity<?> resgatarBeneficio(
@@ -69,15 +64,12 @@ public class AlunoController {
     try {
       ResgateResponse resgate = resgateService.resgatarBeneficio(aluno, beneficioId);
       return ResponseEntity.ok(resgate);
-    } catch (IllegalArgumentException e) {
-      return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
     } catch (Exception e) {
       return ResponseEntity.badRequest()
           .body(new ErrorResponse("Erro ao resgatar benefício: " + e.getMessage()));
     }
   }
 
-  /** Consultar extrato completo GET /api/aluno/extrato */
   @GetMapping("/extrato")
   @PreAuthorize("hasRole('ALUNO')")
   public ResponseEntity<?> consultarExtrato(@AuthenticationPrincipal Aluno aluno) {
@@ -90,20 +82,17 @@ public class AlunoController {
     }
   }
 
-  /** Listar meus resgates GET /api/aluno/meus-resgates */
   @GetMapping("/meus-resgates")
   @PreAuthorize("hasRole('ALUNO')")
   public ResponseEntity<?> listarMeusResgates(@AuthenticationPrincipal Aluno aluno) {
     try {
-      List<ResgateBeneficio> resgates = resgateService.listarResgatesAluno(aluno);
-      return ResponseEntity.ok(resgates);
+      return ResponseEntity.ok(resgateService.listarResgatesAluno(aluno));
     } catch (Exception e) {
       return ResponseEntity.badRequest()
           .body(new ErrorResponse("Erro ao listar resgates: " + e.getMessage()));
     }
   }
 
-  /** Listar notificações/emails GET /api/aluno/notificacoes */
   @GetMapping("/notificacoes")
   @PreAuthorize("hasRole('ALUNO')")
   public ResponseEntity<?> listarNotificacoes(@AuthenticationPrincipal Aluno aluno) {
@@ -117,20 +106,17 @@ public class AlunoController {
     }
   }
 
-  /** Listar apenas notificações não lidas GET /api/aluno/notificacoes/nao-lidas */
   @GetMapping("/notificacoes/nao-lidas")
   @PreAuthorize("hasRole('ALUNO')")
   public ResponseEntity<?> listarNotificacoesNaoLidas(@AuthenticationPrincipal Aluno aluno) {
     try {
-      List<NotificacaoDTO> notificacoes = historicoNotificacaoService.listarNotificacoesNaoLidas(aluno);
-      return ResponseEntity.ok(notificacoes);
+      return ResponseEntity.ok(historicoNotificacaoService.listarNotificacoesNaoLidas(aluno));
     } catch (Exception e) {
       return ResponseEntity.badRequest()
           .body(new ErrorResponse("Erro ao listar notificações não lidas: " + e.getMessage()));
     }
   }
 
-  /** Marcar notificação como lida PUT /api/aluno/notificacoes/{id}/lida */
   @PutMapping("/notificacoes/{id}/lida")
   @PreAuthorize("hasRole('ALUNO')")
   public ResponseEntity<?> marcarComoLida(@PathVariable Long id) {
@@ -143,7 +129,6 @@ public class AlunoController {
     }
   }
 
-  /** Marcar todas as notificações como lidas PUT /api/aluno/notificacoes/marcar-todas-lidas */
   @PutMapping("/notificacoes/marcar-todas-lidas")
   @PreAuthorize("hasRole('ALUNO')")
   public ResponseEntity<?> marcarTodasComoLidas(@AuthenticationPrincipal Aluno aluno) {
@@ -156,7 +141,6 @@ public class AlunoController {
     }
   }
 
-  /** Consultar saldo GET /api/aluno/saldo */
   @GetMapping("/saldo")
   @PreAuthorize("hasRole('ALUNO')")
   public ResponseEntity<?> consultarSaldo(@AuthenticationPrincipal Aluno aluno) {
@@ -164,20 +148,17 @@ public class AlunoController {
         new SaldoResponse(aluno.getSaldoMoedas(), "Aluno: " + aluno.getNome()));
   }
 
-  /** Consultar perfil GET /api/aluno/perfil */
   @GetMapping("/perfil")
   @PreAuthorize("hasRole('ALUNO')")
   public ResponseEntity<?> consultarPerfil(@AuthenticationPrincipal Aluno aluno) {
     return ResponseEntity.ok(aluno);
   }
 
-  /** Atualizar perfil do aluno (próprio aluno) PUT /api/aluno/perfil */
   @PutMapping("/perfil")
   @PreAuthorize("hasRole('ALUNO')")
   public ResponseEntity<?> atualizarPerfil(
       @AuthenticationPrincipal Aluno aluno, @RequestBody AtualizarAlunoRequest request) {
     try {
-
       AlunoRequest req = new AlunoRequest();
       req.setNome(request.nome());
       req.setEmail(request.email());
@@ -187,6 +168,7 @@ public class AlunoController {
       req.setEndereco(request.endereco());
       req.setInstituicao(aluno.getInstituicao());
       req.setCurso(request.curso());
+
       Aluno alunoSalvo = alunoService.alterarDados(aluno.getEmail(), req);
       return ResponseEntity.ok(new Response("Perfil atualizado com sucesso!", alunoSalvo));
     } catch (Exception e) {
@@ -195,49 +177,41 @@ public class AlunoController {
     }
   }
 
-  // ========== CRUD PROTEGIDO ==========
-
-  /** Listar todos os alunos GET /api/aluno/todos (apenas ADMIN) */
   @GetMapping("/todos")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<List<Aluno>> listarTodosAlunos() {
     return ResponseEntity.ok(alunoRepository.findAll());
   }
 
-  /** Buscar aluno por ID GET /api/aluno/{id} (apenas o próprio aluno ou ADMIN) */
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN') or (hasRole('ALUNO') and #id == authentication.principal.id)")
   public ResponseEntity<?> buscarAlunoPorId(@PathVariable Long id) {
-    return alunoRepository
-        .findById(id)
+    return alunoRepository.findById(id)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
   }
 
-  /** Atualizar aluno por ID (apenas o próprio aluno ou ADMIN) PUT /api/aluno/{id} */
   @PutMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN') or (hasRole('ALUNO') and #id == authentication.principal.id)")
   public ResponseEntity<?> atualizarAluno(
       @PathVariable Long id, @RequestBody AtualizarAlunoAdminRequest request) {
-    return alunoRepository
-        .findById(id)
-        .map(
-            aluno -> {
-              if (request.nome() != null) aluno.setNome(request.nome());
-              if (request.cpf() != null) aluno.setCpf(request.cpf());
-              if (request.rg() != null) aluno.setRg(request.rg());
-              if (request.endereco() != null) aluno.setEndereco(request.endereco());
-              if (request.curso() != null) aluno.setCurso(request.curso());
-              if (request.instituicao() != null) aluno.setInstituicao(request.instituicao());
-              if (request.saldoMoedas() != null) aluno.setSaldoMoedas(request.saldoMoedas());
+    return alunoRepository.findById(id)
+        .map(aluno -> {
 
-              Aluno alunoSalvo = alunoRepository.save(aluno);
-              return ResponseEntity.ok(new Response("Aluno atualizado com sucesso!", alunoSalvo));
-            })
+          if (request.nome() != null) aluno.setNome(request.nome());
+          if (request.cpf() != null) aluno.setCpf(request.cpf());
+          if (request.rg() != null) aluno.setRg(request.rg());
+          if (request.endereco() != null) aluno.setEndereco(request.endereco());
+          if (request.curso() != null) aluno.setCurso(request.curso());
+          if (request.instituicao() != null) aluno.setInstituicao(request.instituicao());
+          if (request.saldoMoedas() != null) aluno.setSaldoMoedas(request.saldoMoedas());
+
+          Aluno alunoSalvo = alunoRepository.save(aluno);
+          return ResponseEntity.ok(new Response("Aluno atualizado com sucesso!", alunoSalvo));
+        })
         .orElse(ResponseEntity.notFound().build());
   }
 
-  /** Deletar aluno DELETE /api/aluno/{id} (apenas o próprio aluno ou ADMIN) */
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN') or (hasRole('ALUNO') and #id == authentication.principal.id)")
   public ResponseEntity<?> deletarAluno(@PathVariable Long id) {
@@ -247,27 +221,4 @@ public class AlunoController {
     alunoRepository.deleteById(id);
     return ResponseEntity.ok(new Response("Aluno deletado com sucesso!", null));
   }
-
-  record Response(String message, Object data) {}
-
-  record ErrorResponse(String message) {}
-
-  record ExtratoResponse(Double saldoAtual, List<ExtratoItemDTO> transacoes) {}
-
-  record SaldoResponse(Double saldo, String usuario) {}
-  
-  record NotificacoesResponse(List<NotificacaoDTO> notificacoes, Long naoLidas) {}
-  
-  // Records para requests e responses
-  record AtualizarAlunoRequest(
-      String nome, String endereco, String curso, String email, String senha) {}
-
-  record AtualizarAlunoAdminRequest(
-      String nome,
-      String cpf,
-      String rg,
-      String endereco,
-      String curso,
-      String instituicao,
-      Double saldoMoedas) {}
 }
